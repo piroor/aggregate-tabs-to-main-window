@@ -1,0 +1,4 @@
+{
+  "extensionName": { "message": "メインウィンドウにタブを集約" },
+  "extensionDescription": { "message": "新しいタブが開かれた時、最もタブの数が多くサイズが大きいウィンドウに集約します。" }
+}

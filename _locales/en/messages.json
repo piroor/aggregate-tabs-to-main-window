@@ -1,0 +1,4 @@
+{
+  "extensionName": { "message": "Aggregate Tabs to Main Window" },
+  "extensionDescription": { "message": "Aggregate new tabs to a window which has most many tabs and largest size." }
+}

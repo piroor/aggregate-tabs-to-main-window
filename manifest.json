@@ -1,0 +1,22 @@
+{
+  "manifest_version": 2,
+  "name": "__MSG_extensionName__",
+  "version": "0.1",
+  "author": "YUKI \"Piro\" Hiroshi",
+  "description": "__MSG_extensionDescription__",
+  "permissions": [
+    "storage",
+    "tabs",
+    "windows"
+  ],
+  "background": {
+    "page": "background/background.js"
+  },
+  "default_locale": "en",
+  "applications": {
+    "gecko": {
+      "id": "aggregate-tabs-to-main-window@piro.sakura.ne.jp",
+      "strict_min_version": "57.0"
+    }
+  }
+}

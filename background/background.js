@@ -39,9 +39,9 @@ browser.tabs.onCreated.addListener(async aTab => {
     return;
   }
 
-    await browser.tabs.move([aTab.id], {
-      index:    targetWindow.tabs.length,
-      windowId: targetWindow.id
-    });
-    browser.tabs.update(aTab.id, { active: true });
+  await browser.tabs.move([aTab.id], {
+    index:    targetWindow.tabs.length,
+    windowId: targetWindow.id
+  });
+  browser.tabs.update(aTab.id, { active: true });
 });

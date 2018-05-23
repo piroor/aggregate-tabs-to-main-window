@@ -14,13 +14,13 @@ browser.tabs.onCreated.addListener(async aTab => {
     populate:    true,
     windowTypes: ['normal']
   });
-  log('windows: ', windows.length);
+  log('windows: ', windows);
   if (windows.length <= 1) {
     log('do nothing because there is only one window');
     return;
   }
 
-  const sourceWindow = windows.filter(aWindow => aWindow.id != aTab.windowId)[0];
+  const sourceWindow = windows.filter(aWindow => aWindow.id == aTab.windowId)[0];
   log('sourceWindow: ', sourceWindow);
   if (sourceWindow.tabs.length <= 1) {
     log('do nothing because it is a new window');

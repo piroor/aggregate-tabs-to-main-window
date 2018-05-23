@@ -44,5 +44,4 @@ browser.tabs.onCreated.addListener(async aTab => {
       windowId: targetWindow.id
     });
     browser.tabs.update(aTab.id, { active: true });
-  }
 });

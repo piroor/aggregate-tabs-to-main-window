@@ -1,4 +1,6 @@
 # from external
+makexpi/*
+extlib/*
 common/Configs.js
 
 # include as a lint target.

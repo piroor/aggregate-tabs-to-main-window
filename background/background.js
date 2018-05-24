@@ -41,13 +41,21 @@ browser.tabs.onCreated.addListener(async aTab => {
   browser.tabs.update(aTab.id, { active: true });
 });
 
+const gCreatedAt = new Map();
 const gLastActive = new Map();
 
 browser.windows.onCreated.addListener(aWindow => {
-  gLastActive.set(aWindow.id, Date.now());
+  const now = Date.now();
+  gCreatedAt.set(aWindow.id, now);
+  gLastActive.set(aWindow.id, now);
+});
+
+browser.windows.onFocusChanged.addListener(aWindowId => {
+  gLastActive.set(aWindowId, Date.now());
 });
 
 browser.windows.onRemoved.addListener(aWindowId => {
+  gCreatedAt.delete(aWindowId);
   gLastActive.delete(aWindowId);
 });
 

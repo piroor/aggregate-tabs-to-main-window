@@ -63,8 +63,8 @@ function findMainWindowFrom(aWindows) {
   const windows = aWindows.slice(0).sort((aA, aB) =>
     comparers.wider(aA, aB) ||
     comparers.taller(aA, aB) ||
-    comparers.muchTabs(aA, aB) ||
-    comparers.recent(aA, aB)
+    comparers.recent(aA, aB) ||
+    comparers.muchTabs(aA, aB)
   );
   log('findMainWindowFrom: sorted windows: ', windows);
   return windows[0];

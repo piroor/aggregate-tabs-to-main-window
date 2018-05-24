@@ -18,7 +18,7 @@ function log(aMessage, ...aArgs)
   for (let i = 0; i < nest; i++) {
     indent += ' ';
   }
-  console.log(`aggregate-tabs-to-main-window<${gLogContext}>: ${indent}${aMessage}`, ...aArgs);
+  console.log(`aggregate-tabs<${gLogContext}>: ${indent}${aMessage}`, ...aArgs);
 }
 
 function wait(aDelay) {

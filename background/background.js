@@ -24,7 +24,7 @@ browser.tabs.onCreated.addListener(async aTab => {
   gOpeningTabs.splice(gOpeningTabs.indexOf(aTab.id), 1);
 
   if (Date.now() - gCreatedAt.get(aTab.windowId) < configs.delayForNewWindow) {
-    log('do nothing because this is maybe restoring window');
+    log(`tab ${aTab.id}: do nothing  because this window is opened with the tab explicitly (maybe a restored window)`);
     return;
   }
 
@@ -32,23 +32,23 @@ browser.tabs.onCreated.addListener(async aTab => {
     populate:    true,
     windowTypes: ['normal']
   });
-  log('windows: ', windows);
+  log(`tab ${aTab.id}: windows: `, windows);
   if (windows.length <= 1) {
-    log('do nothing because there is only one window');
+    log(`tab ${aTab.id}: do nothing because there is only one window`);
     return;
   }
 
   const sourceWindow = windows.filter(aWindow => aWindow.id == aTab.windowId)[0];
-  log('sourceWindow: ', sourceWindow);
+  log(`tab ${aTab.id}: sourceWindow: `, sourceWindow);
   if (sourceWindow.tabs.length <= 1) {
-    log('do nothing because it is a new window');
+    log(`tab ${aTab.id}: do nothing because it is a new window`);
     return;
   }
 
   const mainWindow = findMainWindowFrom(windows);
-  log('mainWindow: ', mainWindow.id);
+  log(`tab ${aTab.id}: mainWindow: `, mainWindow.id);
   if (aTab.windowId == mainWindow.id) {
-    log('do nothing because it is the main window');
+    log(`tab ${aTab.id}: do nothing because it is the main window`);
     return;
   }
 

@@ -41,11 +41,19 @@ browser.tabs.onCreated.addListener(async aTab => {
   browser.tabs.update(aTab.id, { active: true });
 });
 
+const comparers = {
+  wider:    (aA, aB) => aB.width - aA.width,
+  taller:   (aA, aB) => aB.height - aA.height,
+  larger:   (aA, aB) => (aB.width * aB.height) - (aA.width * aA.height),
+  muchTabs: (aA, aB) => aB.tabs.length - aA.tabs.length,
+};
+
 function findMainWindowFrom(aWindows) {
-  const windows = aWindows.slice(0).sort((aA, aB) => {
-    return (aB.width * aB.height) - (aA.width * aA.height) ||
-           aB.tabs.length - aA.tabs.length;
-  });
+  const windows = aWindows.slice(0).sort((aA, aB) =>
+    comparers.wider(aA, aB) ||
+    comparers.taller(aA, aB) ||
+    muchTabs.taller(aA, aB)
+  );
   log('findMainWindowFrom: sorted windows: ', windows);
   return windows[0];
 }

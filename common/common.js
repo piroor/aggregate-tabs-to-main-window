@@ -22,6 +22,7 @@ function log(aMessage, ...aArgs)
 }
 
 configs = new Configs({
+  activeComparers: ['wider', 'taller', 'muchTabs', 'recent'],
   delayForNewWindow: 1000,
   debug: false
 }, {

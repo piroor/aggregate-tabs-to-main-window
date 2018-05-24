@@ -72,12 +72,14 @@ const comparers = {
 };
 
 function findMainWindowFrom(aWindows) {
-  const windows = aWindows.slice(0).sort((aA, aB) =>
-    comparers.wider(aA, aB) ||
-    comparers.taller(aA, aB) ||
-    comparers.recent(aA, aB) ||
-    comparers.muchTabs(aA, aB)
-  );
+  const windows = aWindows.slice(0).sort((aA, aB) => {
+    for (let name of configs.activeComparers) {
+      const result = comparers[name](aA, aB);
+      if (result !== 0)
+        return result;
+    }
+    return 0;
+  });
   log('findMainWindowFrom: sorted windows: ', windows);
   return windows[0];
 }

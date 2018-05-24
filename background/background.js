@@ -9,6 +9,10 @@ gLogContext = 'BG';
 
 browser.tabs.onCreated.addListener(async aTab => {
   log('new tab: ', aTab);
+  if (Date.now() - gCreatedAt.get(aTab.windowId) < configs.delayForNewWindow) {
+    log('do nothing because this is maybe restoring window');
+    return;
+  }
 
   const windows = await browser.windows.getAll({
     populate:    true,

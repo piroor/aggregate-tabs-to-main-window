@@ -22,6 +22,7 @@ function log(aMessage, ...aArgs)
 }
 
 configs = new Configs({
+  delayForNewWindow: 1000,
   debug: false
 }, {
   localKeys: `

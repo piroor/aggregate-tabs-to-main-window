@@ -16,7 +16,7 @@ browser.tabs.onCreated.addListener(async aTab => {
   await wait(configs.delayForMultipleNewTabs);
   if (gOpeningTabs.length > 1) {
     log(`do nothing for tab ${aTab.id} because multiple tabs are opened at a time`);
-    await wait(configs.delayForMultipleNewTabs);
+    await wait(100);
     gOpeningTabs.splice(gOpeningTabs.indexOf(aTab.id), 1);
     return;
   }

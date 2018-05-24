@@ -27,21 +27,25 @@ browser.tabs.onCreated.addListener(async aTab => {
     return;
   }
 
-  windows.sort((aA, aB) => {
-    return (aB.width * aB.height) - (aA.width * aA.height) ||
-           aB.tabs.length - aA.tabs.length;
-  });
-  log(' => ', windows);
-  const targetWindow = windows[0];
-  log('targetWindow: ', targetWindow.id);
-  if (aTab.windowId == targetWindow.id) {
+  const mainWindow = findMainWindowFrom(windows);
+  log('mainWindow: ', mainWindow.id);
+  if (aTab.windowId == mainWindow.id) {
     log('do nothing because it is the main window');
     return;
   }
 
   await browser.tabs.move([aTab.id], {
-    index:    targetWindow.tabs.length,
-    windowId: targetWindow.id
+    index:    mainWindow.tabs.length,
+    windowId: mainWindow.id
   });
   browser.tabs.update(aTab.id, { active: true });
 });
+
+function findMainWindowFrom(aWindows) {
+  const windows = aWindows.slice(0).sort((aA, aB) => {
+    return (aB.width * aB.height) - (aA.width * aA.height) ||
+           aB.tabs.length - aA.tabs.length;
+  });
+  log('findMainWindowFrom: sorted windows: ', windows);
+  return windows[0];
+}

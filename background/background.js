@@ -14,8 +14,9 @@ browser.tabs.onCreated.addListener(async aTab => {
 
   gOpeningTabs.push(aTab.id);
   await wait(configs.delayForMultipleNewTabs);
-  if (gOpeningTabs.length > 1) {
-    log(`do nothing for tab ${aTab.id} because multiple tabs are opened at a time`);
+  if (gOpeningTabs.length > 1 &&
+      Date.now() - gLsatCreatedAt < configs.delayForNewWindow) {
+    log(`tab ${aTab.id}: do nothing because multiple tabs are restored in an existing window`);
     await wait(100);
     gOpeningTabs.splice(gOpeningTabs.indexOf(aTab.id), 1);
     return;
@@ -60,11 +61,13 @@ browser.tabs.onCreated.addListener(async aTab => {
 
 const gCreatedAt = new Map();
 const gLastActive = new Map();
+let gLsatCreatedAt = 0;
 
 browser.windows.onCreated.addListener(aWindow => {
   const now = Date.now();
   gCreatedAt.set(aWindow.id, now);
   gLastActive.set(aWindow.id, now);
+  gLsatCreatedAt = now;
 });
 
 browser.windows.onFocusChanged.addListener(aWindowId => {

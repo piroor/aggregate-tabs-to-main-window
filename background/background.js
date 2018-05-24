@@ -41,18 +41,30 @@ browser.tabs.onCreated.addListener(async aTab => {
   browser.tabs.update(aTab.id, { active: true });
 });
 
+const gLastActive = new Map();
+
+browser.windows.onCreated.addListener(aWindow => {
+  gLastActive.set(aWindow.id, Date.now());
+});
+
+browser.windows.onRemoved.addListener(aWindowId => {
+  gLastActive.delete(aWindowId);
+});
+
 const comparers = {
   wider:    (aA, aB) => aB.width - aA.width,
   taller:   (aA, aB) => aB.height - aA.height,
   larger:   (aA, aB) => (aB.width * aB.height) - (aA.width * aA.height),
   muchTabs: (aA, aB) => aB.tabs.length - aA.tabs.length,
+  recent:   (aA, aB) => (gLastActive.get(aB) || 0) - (gLastActive.get(aA) || 0),
 };
 
 function findMainWindowFrom(aWindows) {
   const windows = aWindows.slice(0).sort((aA, aB) =>
     comparers.wider(aA, aB) ||
     comparers.taller(aA, aB) ||
-    muchTabs.taller(aA, aB)
+    comparers.muchTabs(aA, aB) ||
+    comparers.recent(aA, aB)
   );
   log('findMainWindowFrom: sorted windows: ', windows);
   return windows[0];

@@ -7,8 +7,21 @@
 
 gLogContext = 'BG';
 
+const gOpeningTabs = [];
+
 browser.tabs.onCreated.addListener(async aTab => {
   log('new tab: ', aTab);
+
+  gOpeningTabs.push(aTab.id);
+  await wait(configs.delayForMultipleNewTabs);
+  if (gOpeningTabs.length > 1) {
+    log(`do nothing for tab ${aTab.id} because multiple tabs are opened at a time`);
+    await wait(configs.delayForMultipleNewTabs);
+    gOpeningTabs.splice(gOpeningTabs.indexOf(aTab.id), 1);
+    return;
+  }
+  gOpeningTabs.splice(gOpeningTabs.indexOf(aTab.id), 1);
+
   if (Date.now() - gCreatedAt.get(aTab.windowId) < configs.delayForNewWindow) {
     log('do nothing because this is maybe restoring window');
     return;

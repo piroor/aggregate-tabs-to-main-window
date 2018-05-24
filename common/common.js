@@ -21,8 +21,13 @@ function log(aMessage, ...aArgs)
   console.log(`aggregate-tabs-to-main-window<${gLogContext}>: ${indent}${aMessage}`, ...aArgs);
 }
 
+function wait(aDelay) {
+  return new Promise((aResolve, aReject) => setTimeout(aResolve, aDelay));
+}
+
 configs = new Configs({
   activeComparers: ['wider', 'taller', 'muchTabs', 'recent'],
+  delayForMultipleNewTabs: 300,
   delayForNewWindow: 1000,
   debug: false
 }, {

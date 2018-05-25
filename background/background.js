@@ -10,7 +10,7 @@ gLogContext = 'BG';
 const gOpeningTabs = [];
 
 browser.tabs.onCreated.addListener(async aTab => {
-  log('new tab: ', aTab);
+  log('onCreated: tab: ', aTab);
 
   gOpeningTabs.push(aTab.id);
   await wait(configs.delayForMultipleNewTabs);
@@ -28,35 +28,39 @@ browser.tabs.onCreated.addListener(async aTab => {
     return;
   }
 
-  const windows = await browser.windows.getAll({
-    populate:    true,
-    windowTypes: ['normal']
+  const mainWindow = await getRedirectTargetWindowForTab(aTab, {
+    excludeLastTab: true
   });
-  log(`tab ${aTab.id}: windows: `, windows);
-  if (windows.length <= 1) {
-    log(`tab ${aTab.id}: do nothing because there is only one window`);
+  if (!mainWindow)
     return;
-  }
-
-  const sourceWindow = windows.filter(aWindow => aWindow.id == aTab.windowId)[0];
-  log(`tab ${aTab.id}: sourceWindow: `, sourceWindow);
-  if (sourceWindow.tabs.length <= 1) {
-    log(`tab ${aTab.id}: do nothing because it is a new window`);
-    return;
-  }
-
-  const mainWindow = findMainWindowFrom(windows);
-  log(`tab ${aTab.id}: mainWindow: `, mainWindow.id);
-  if (aTab.windowId == mainWindow.id) {
-    log(`tab ${aTab.id}: do nothing because it is the main window`);
-    return;
-  }
 
   await browser.tabs.move([aTab.id], {
     index:    mainWindow.tabs.length,
     windowId: mainWindow.id
   });
   browser.tabs.update(aTab.id, { active: true });
+});
+
+browser.tabs.onUpdated.addListener(async (aTabId, aChangeInfo, aTab) => {
+  if (!configs.redirectLoadingInCurrentTab ||
+      !aChangeInfo.url ||
+      !aTab.active)
+    return;
+
+  log(`tab ${aTab.id}: window.width = ${window.width}`);
+  if (window.width >= configs.redirectLoadingInCurrentTabMinWindowWidth)
+    return;
+
+  const mainWindow = await getRedirectTargetWindowForTab(aTab);
+  if (!mainWindow)
+    return;
+
+  browser.tabs.create({
+    url:      aChangeInfo.url,
+    active:   true,
+    index:    mainWindow.tabs.length,
+    windowId: mainWindow.id
+  });
 });
 
 const gCreatedAt = new Map();
@@ -78,6 +82,36 @@ browser.windows.onRemoved.addListener(aWindowId => {
   gCreatedAt.delete(aWindowId);
   gLastActive.delete(aWindowId);
 });
+
+
+async function getRedirectTargetWindowForTab(aTab, aOptions = {}) {
+  log(`getRedirectTargetWindowForTab: id = ${aTab.id}`);
+  const windows = await browser.windows.getAll({
+    populate:    true,
+    windowTypes: ['normal']
+  });
+  log('windows: ', windows);
+  if (windows.length <= 1) {
+    log('do nothing because there is only one window');
+    return null;
+  }
+
+  const sourceWindow = windows.filter(aWindow => aWindow.id == aTab.windowId)[0];
+  log('sourceWindow: ', sourceWindow);
+  if (aOptions.excludeLastTab &&
+      sourceWindow.tabs.length <= 1) {
+    log('do nothing because it is a new window');
+    return null;
+  }
+
+  const mainWindow = findMainWindowFrom(windows);
+  log('mainWindow: ', mainWindow.id);
+  if (aTab.windowId == mainWindow.id) {
+    log('do nothing because it is the main window');
+    return null;
+  }
+  return mainWindow;
+}
 
 const comparers = {
   wider:    (aA, aB) => aB.width - aA.width,

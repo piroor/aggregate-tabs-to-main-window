@@ -27,7 +27,7 @@ function wait(aDelay) {
 
 configs = new Configs({
   activeComparers: ['wider', 'taller', 'muchTabs', 'recent'],
-  redirectLoadingInCurrentTab: true,
+  redirectLoadingInCurrentTab: false,
   redirectLoadingInCurrentTabMinWindowWidth: 400,
   delayForMultipleNewTabs: 300,
   delayForNewWindow: 1000,

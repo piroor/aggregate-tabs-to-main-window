@@ -2,6 +2,10 @@
   "extensionName": { "message": "メインウィンドウにタブを集約" },
   "extensionDescription": { "message": "新しいタブが開かれた時、最もタブの数が多くサイズが大きいウィンドウに集約します。" },
 
+  "config_sidebar_caption": { "message": "サイドバー表示用ウィンドウ" },
+  "config_redirectLoadingInCurrentTabMinWindowWidth_label_before": { "message": "\u200b" },
+  "config_redirectLoadingInCurrentTabMinWindowWidth_label_after": { "message": "ピクセルよりも幅が狭いウィンドウをサイドバー表示用ウィンドウと見なし、ページが現在のタブに読み込まれたらメインウィンドウで新しいタブとして開く" },
+
   "config_debug_caption": { "message": "開発用" },
   "config_debug_label": { "message": "デバッグモード" },
   "config_all_caption": { "message": "すべての設定" }

@@ -86,10 +86,10 @@ browser.windows.onRemoved.addListener(aWindowId => {
 
 async function getRedirectTargetWindowForTab(aTab, aOptions = {}) {
   log(`getRedirectTargetWindowForTab: id = ${aTab.id}`);
-  const windows = await browser.windows.getAll({
+  const windows = (await browser.windows.getAll({
     populate:    true,
     windowTypes: ['normal']
-  });
+  })).filter(aWindow => aWindow.incognito == aTab.incognito);
   log('windows: ', windows);
   if (windows.length <= 1) {
     log('do nothing because there is only one window');

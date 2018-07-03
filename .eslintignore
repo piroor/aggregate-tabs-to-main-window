@@ -1,9 +1,6 @@
 # from external
 makexpi/*
 extlib/*
-common/Configs.js
-common/l10n.js
-options/Options.js
 
 # include as a lint target.
 !.eslintrc.js

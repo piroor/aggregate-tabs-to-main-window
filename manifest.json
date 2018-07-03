@@ -10,7 +10,7 @@
   ],
   "background": {
     "scripts": [
-      "common/Configs.js",
+      "extlib/Configs.js",
       "common/common.js",
       "background/background.js"
     ]

@@ -1,7 +1,7 @@
 NPM_MOD_DIR := $(CURDIR)/node_modules
 NPM_BIN_DIR := $(NPM_MOD_DIR)/.bin
 
-.PHONY: xpi install_dependency lint format
+.PHONY: xpi install_dependency lint format update_extlib install_extlib
 
 all: xpi
 
@@ -14,20 +14,19 @@ lint:
 format:
 	$(NPM_BIN_DIR)/eslint . --ext=.js --report-unused-disable-directives --fix
 
-xpi: lint extlib/webextensions-lib-configs/Configs.js extlib/webextensions-lib-l10n/l10n.js extlib/webextensions-lib-options/Options.js
+xpi: update_extlib install_extlib lint
 	git submodule update
-	cp extlib/webextensions-lib-configs/Configs.js common/
-	cp extlib/webextensions-lib-l10n/l10n.js common/
-	cp extlib/webextensions-lib-options/Options.js options/
+	cp submodules/webextensions-lib-configs/Configs.js extlib/
+	cp submodules/webextensions-lib-l10n/l10n.js extlib/
+	cp submodules/webextensions-lib-options/Options.js extlib/
 	rm -f ./*.xpi
 	zip -r -0 aggregate-tabs-to-main-window.xpi manifest.json _locales common background options >/dev/null 2>/dev/null
 
-extlib/webextensions-lib-configs/Configs.js:
+update_extlib:
 	git submodule update --init
 
-extlib/webextensions-lib-l10n/l10n.js:
-	git submodule update --init
-
-extlib/webextensions-lib-options/Options.js:
-	git submodule update --init
+install_extlib:
+	cp submodules/webextensions-lib-configs/Configs.js extlib/
+	cp submodules/webextensions-lib-options/Options.js extlib/
+	cp submodules/webextensions-lib-l10n/l10n.js extlib/
 

@@ -6,6 +6,14 @@
   "config_redirectLoadingInCurrentTabMinWindowWidth_label_before": { "message": "Treat windows as Sidebar Only Window if smaller than " },
   "config_redirectLoadingInCurrentTabMinWindowWidth_label_after": { "message": "px width, and open new tab in the main window when any URL is loaded in the current tab of a Sidebar Only Window" },
 
+  "config_aggregatedTabCondition_caption":     { "message": "Tabs to be aggregated" },
+  "config_aggregateTabsFromPinned_caption":    { "message": "Opened from a pinned tab" },
+  "config_aggregateTabsFromUnpinned_caption":  { "message": "Opened from a regular tab" },
+  "config_aggregateTabsMatched_caption":       { "message": "The tab's URL is matched to the following regular expression:" },
+  "config_aggregateTabsFromMatched_caption":   { "message": "The opener tab's URL is matched to the following regular expression:" },
+  "config_aggregateTabsForBookmarked_caption": { "message": "Maybe opened from a bookmark" },
+  "config_aggregateTabsAll_caption":           { "message": "Any other case (tabs from external applications, etc.)" },
+
   "config_debug_caption": { "message": "Development" },
   "config_debug_label": { "message": "Debug mode" },
   "config_all_caption": { "message": "All Configs" }

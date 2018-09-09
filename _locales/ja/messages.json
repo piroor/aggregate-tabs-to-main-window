@@ -6,6 +6,14 @@
   "config_redirectLoadingInCurrentTabMinWindowWidth_label_before": { "message": "\u200b" },
   "config_redirectLoadingInCurrentTabMinWindowWidth_label_after": { "message": "ピクセルよりも幅が狭いウィンドウをサイドバー表示用ウィンドウと見なし、ページが現在のタブに読み込まれたらメインウィンドウで新しいタブとして開く" },
 
+  "config_aggregatedTabCondition_caption":     { "message": "集約する対象のタブ" },
+  "config_aggregateTabsFromPinned_caption":    { "message": "ピン留めされたタブから開かれたタブ" },
+  "config_aggregateTabsFromUnpinned_caption":  { "message": "通常のタブから開かれたタブ" },
+  "config_aggregateTabsMatched_caption":       { "message": "そのタブ自体のURLが以下の正規表現にマッチする場合：" },
+  "config_aggregateTabsFromMatched_caption":   { "message": "そのタブを開いたタブのURLが以下の正規表現にマッチする場合：" },
+  "config_aggregateTabsForBookmarked_caption": { "message": "ブックマークから開かれたであろうタブ" },
+  "config_aggregateTabsAll_caption":           { "message": "その他の場合すべて（他のアプリケーションから開かれたタブなど）" },
+
   "config_debug_caption": { "message": "開発用" },
   "config_debug_label": { "message": "デバッグモード" },
   "config_all_caption": { "message": "すべての設定" }

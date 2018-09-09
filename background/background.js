@@ -9,6 +9,46 @@ gLogContext = 'BG';
 
 const gOpeningTabs = [];
 
+let gAggregateTabsMatchedPattern = null;
+let gAggregateTabsFromMatchedPattern = null;
+
+configs.$loaded.then(() => {
+  updateAggregateTabsMatchedPattern();
+  updateAggregateTabsFromMatchedPattern();
+});
+
+configs.$addObserver(key => {
+  switch (key) {
+    case 'aggregateTabsMatchedPattern':
+      updateAggregateTabsMatchedPattern();
+      break;
+    case 'aggregateTabsFromMatchedPattern':
+      updateAggregateTabsFromMatchedPattern();
+      break;
+  }
+});
+
+function updateAggregateTabsMatchedPattern() {
+  try {
+    const source = (configs.aggregateTabsMatchedPattern || '').trim();
+    gAggregateTabsMatchedPattern = source && new RegExp(source, 'i');
+  }
+  catch(_e) {
+    gAggregateTabsMatchedPattern = null;
+  }
+}
+
+function updateAggregateTabsFromMatchedPattern() {
+  try {
+    const source = (configs.aggregateTabsFromMatchedPattern || '').trim();
+    gAggregateTabsFromMatchedPattern = source && new RegExp(source, 'i');
+  }
+  catch(_e) {
+    gAggregateTabsFromMatchedPattern = null;
+  }
+}
+
+
 browser.tabs.onCreated.addListener(async aTab => {
   log('onCreated: tab: ', aTab);
 
@@ -83,9 +123,51 @@ browser.windows.onRemoved.addListener(aWindowId => {
   gLastActive.delete(aWindowId);
 });
 
+async function shouldAggregateTab(aTab) {
+  const opener = aTab.openerTabId && await browser.tabs.get(aTab.openerTabId);
+  let shouldBeAggregated = null;
+  if (opener) {
+    if (opener.pinned) {
+      shouldBeAggregated = configs.aggregateTabsFromPinned;
+    }
+    else {
+      shouldBeAggregated = configs.aggregateTabsFromUnpinned;
+    }
+
+    /*
+    if (gAggregateTabsFromMatchedPattern) {
+      const matched = gAggregateTabsFromMatchedPattern.test(opener.url);
+      if (configs.aggregateTabsFromMatched == matched)
+          shouldBeAggregated = matched;
+    }
+    */
+  }
+
+  /*
+  if (gAggregateTabsMatchedPattern) {
+    const matched = gAggregateTabsMatchedPattern.test(aTab.url);
+    if (configs.aggregateTabsMatched == matched)
+        shouldBeAggregated = matched;
+  }
+
+  if (configs.aggregateTabsForBookmarked)
+    shouldBeAggregated = (await browser.bookmarks.search({ url: aTab.url })).length > 0;
+  */
+
+  if (shouldBeAggregated !== null)
+    return shouldBeAggregated;
+
+  return configs.aggregateTabsAll;
+}
+
 
 async function getRedirectTargetWindowForTab(aTab, aOptions = {}) {
-  log(`getRedirectTargetWindowForTab: id = ${aTab.id}`);
+  log(`getRedirectTargetWindowForTab: id = ${aTab.id}`, aTab);
+
+  const shouldBeAggregated = await shouldAggregateTab(aTab);
+  if (!shouldBeAggregated)
+    return null;
+
   const windows = (await browser.windows.getAll({
     populate:    true,
     windowTypes: ['normal']

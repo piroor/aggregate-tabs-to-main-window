@@ -27,6 +27,14 @@ function wait(aDelay) {
 
 configs = new Configs({
   activeComparers: ['wider', 'taller', 'muchTabs', 'recent'],
+  aggregateTabsFromPinned: true,
+  aggregateTabsFromUnpinned: true,
+  aggregateTabsMatched: true,
+  aggregateTabsMatchedPattern: '^(about:newtab)',
+  aggregateTabsFromMatched: true,
+  aggregateTabsFromMatchedPattern: '',
+  aggregateTabsForBookmarked: true,
+  aggregateTabsAll: true,
   redirectLoadingInCurrentTab: false,
   redirectLoadingInCurrentTabMinWindowWidth: 400,
   delayForMultipleNewTabs: 300,

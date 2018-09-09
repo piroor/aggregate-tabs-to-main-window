@@ -134,13 +134,11 @@ async function shouldAggregateTab(aTab) {
       shouldBeAggregated = configs.aggregateTabsFromUnpinned;
     }
 
-    /*
     if (gAggregateTabsFromMatchedPattern) {
       const matched = gAggregateTabsFromMatchedPattern.test(opener.url);
       if (configs.aggregateTabsFromMatched == matched)
           shouldBeAggregated = matched;
     }
-    */
   }
 
   /*

@@ -208,28 +208,28 @@ async function shouldAggregateTab(aTab) {
       log('unpinned opener, should aggregate = ', shouldBeAggregated);
     }
 
-    if (gAggregateTabsFromMatchedPattern) {
-      if (configs.aggregateTabsFromMatched &&
+    if (configs.aggregateTabsFromMatched) {
+      if (gAggregateTabsFromMatchedPattern &&
           gAggregateTabsFromMatchedPattern.test(opener.url))
         shouldBeAggregated = true;
       log('matched opener, should aggregate = ', { shouldBeAggregated, gAggregateTabsFromMatchedPattern, url: opener.url });
     }
-    if (gDoNotAggregateTabsFromMatchedPattern) {
-      if (configs.doNotAggregateTabsFromMatched &&
+    if (configs.doNotAggregateTabsFromMatched) {
+      if (gDoNotAggregateTabsFromMatchedPattern &&
           gDoNotAggregateTabsFromMatchedPattern.test(opener.url))
         shouldBeAggregated = false;
       log('matched opener for exception, should aggregate = ', { shouldBeAggregated, gDoNotAggregateTabsFromMatchedPattern, url: opener.url });
     }
   }
 
-  if (gAggregateTabsMatchedPattern) {
-    if (configs.aggregateTabsMatched &&
+  if (configs.aggregateTabsMatched) {
+    if (gAggregateTabsMatchedPattern &&
         gAggregateTabsMatchedPattern.test(aTab.url))
       shouldBeAggregated = true;
     log('matched tab, should aggregate = ', { shouldBeAggregated, gAggregateTabsMatchedPattern, url: aTab.url });
   }
-  if (gDoNotAggregateTabsMatchedPattern) {
-    if (configs.doNotAggregateTabsMatched &&
+  if (configs.doNotAggregateTabsMatched) {
+    if (gDoNotAggregateTabsMatchedPattern &&
         gDoNotAggregateTabsMatchedPattern.test(aTab.url))
       shouldBeAggregated = false;
     log('matched tab for exception, should aggregate = ', { shouldBeAggregated, gDoNotAggregateTabsMatchedPattern, url: aTab.url });

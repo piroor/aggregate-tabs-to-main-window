@@ -1,6 +1,7 @@
 # History
 
  - master/HEAD
+ - 1.3.0 (2018.9.10)
    * Add ability to configure conditions of tabs to be moved.
  - 1.2.1 (2018.5.31)
    * Don't move tabs between regular window and private browsing window.

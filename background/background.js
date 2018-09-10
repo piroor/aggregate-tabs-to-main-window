@@ -237,8 +237,10 @@ async function shouldAggregateTab(aTab) {
 
   if (configs.aggregateTabsForBookmarked) {
     try {
-      shouldBeAggregated = (await browser.bookmarks.search({ url: aTab.url })).length > 0;
-      log('bookmarked url, should aggregate = ', { shouldBeAggregated, url: aTab.url });
+      if ((await browser.bookmarks.search({ url: aTab.url })).length > 0) {
+        shouldBeAggregated = true;
+        log('bookmarked url, should aggregate = ', { shouldBeAggregated, url: aTab.url });
+      }
     }
     catch(_e) {
     }

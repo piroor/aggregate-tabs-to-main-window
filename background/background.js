@@ -12,10 +12,14 @@ const gCreatingTabs = new Set();
 
 let gAggregateTabsMatchedPattern = null;
 let gAggregateTabsFromMatchedPattern = null;
+let gDoNotAggregateTabsMatchedPattern = null;
+let gDoNotAggregateTabsFromMatchedPattern = null;
 
 configs.$loaded.then(() => {
   updateAggregateTabsMatchedPattern();
   updateAggregateTabsFromMatchedPattern();
+  updateDoNotAggregateTabsMatchedPattern();
+  updateDoNotAggregateTabsFromMatchedPattern();
 });
 
 configs.$addObserver(key => {
@@ -25,6 +29,12 @@ configs.$addObserver(key => {
       break;
     case 'aggregateTabsFromMatchedPattern':
       updateAggregateTabsFromMatchedPattern();
+      break;
+    case 'doNotAggregateTabsMatchedPattern':
+      updateDoNotAggregateTabsMatchedPattern();
+      break;
+    case 'doNotAggregateTabsFromMatchedPattern':
+      updateDoNotAggregateTabsFromMatchedPattern();
       break;
   }
 });
@@ -46,6 +56,26 @@ function updateAggregateTabsFromMatchedPattern() {
   }
   catch(_e) {
     gAggregateTabsFromMatchedPattern = null;
+  }
+}
+
+function updateDoNotAggregateTabsMatchedPattern() {
+  try {
+    const source = (configs.doNotAggregateTabsMatchedPattern || '').trim();
+    gDoNotAggregateTabsMatchedPattern = source && new RegExp(source, 'i');
+  }
+  catch(_e) {
+    gDoNotAggregateTabsMatchedPattern = null;
+  }
+}
+
+function updateDoNotAggregateTabsFromMatchedPattern() {
+  try {
+    const source = (configs.doNotAggregateTabsFromMatchedPattern || '').trim();
+    gDoNotAggregateTabsFromMatchedPattern = source && new RegExp(source, 'i');
+  }
+  catch(_e) {
+    gDoNotAggregateTabsFromMatchedPattern = null;
   }
 }
 
@@ -179,18 +209,30 @@ async function shouldAggregateTab(aTab) {
     }
 
     if (gAggregateTabsFromMatchedPattern) {
-      const matched = gAggregateTabsFromMatchedPattern.test(opener.url);
-      if (matched)
-        shouldBeAggregated = configs.aggregateTabsFromMatched;
+      if (configs.aggregateTabsFromMatched &&
+          gAggregateTabsFromMatchedPattern.test(opener.url))
+        shouldBeAggregated = true;
       log('matched opener, should aggregate = ', { shouldBeAggregated, gAggregateTabsFromMatchedPattern, url: opener.url });
+    }
+    if (gDoNotAggregateTabsFromMatchedPattern) {
+      if (configs.doNotAggregateTabsFromMatched &&
+          gDoNotAggregateTabsFromMatchedPattern.test(opener.url))
+        shouldBeAggregated = false;
+      log('matched opener for exception, should aggregate = ', { shouldBeAggregated, gDoNotAggregateTabsFromMatchedPattern, url: opener.url });
     }
   }
 
   if (gAggregateTabsMatchedPattern) {
-    const matched = gAggregateTabsMatchedPattern.test(aTab.url);
-    if (matched)
-      shouldBeAggregated = configs.aggregateTabsMatched;
+    if (configs.aggregateTabsMatched &&
+        gAggregateTabsMatchedPattern.test(aTab.url))
+      shouldBeAggregated = true;
     log('matched tab, should aggregate = ', { shouldBeAggregated, gAggregateTabsMatchedPattern, url: aTab.url });
+  }
+  if (gDoNotAggregateTabsMatchedPattern) {
+    if (configs.doNotAggregateTabsMatched &&
+        gDoNotAggregateTabsMatchedPattern.test(aTab.url))
+      shouldBeAggregated = false;
+    log('matched tab for exception, should aggregate = ', { shouldBeAggregated, gDoNotAggregateTabsMatchedPattern, url: aTab.url });
   }
 
   /*

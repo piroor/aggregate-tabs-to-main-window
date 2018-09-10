@@ -10,7 +10,9 @@
   "config_aggregateTabsFromPinned_caption":    { "message": "ピン留めされたタブから開かれたタブ" },
   "config_aggregateTabsFromUnpinned_caption":  { "message": "通常のタブから開かれたタブ" },
   "config_aggregateTabsFromMatched_caption":   { "message": "以下の正規表現にマッチするURLのタブから開かれたタブ：" },
+  "config_doNotAggregateTabsFromMatched_caption": { "message": "ただし、以下の正規表現にマッチする場合を除く：" },
   "config_aggregateTabsMatched_caption":       { "message": "そのタブ自体のURLが以下の正規表現にマッチするタブ：" },
+  "config_doNotAggregateTabsMatched_caption":  { "message": "ただし、以下の正規表現にマッチする場合を除く：" },
   "config_aggregateTabsForBookmarked_caption": { "message": "ブックマークから開かれたであろうタブ" },
   "config_aggregateTabsAll_caption":           { "message": "その他の場合すべて（他のアプリケーションから開かれたタブなど）" },
 

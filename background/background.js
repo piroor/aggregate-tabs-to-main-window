@@ -235,10 +235,14 @@ async function shouldAggregateTab(aTab) {
     log('matched tab for exception, should aggregate = ', { shouldBeAggregated, gDoNotAggregateTabsMatchedPattern, url: aTab.url });
   }
 
-  /*
-  if (configs.aggregateTabsForBookmarked)
-    shouldBeAggregated = (await browser.bookmarks.search({ url: aTab.url })).length > 0;
-  */
+  if (configs.aggregateTabsForBookmarked) {
+    try {
+      shouldBeAggregated = (await browser.bookmarks.search({ url: aTab.url })).length > 0;
+      log('bookmarked url, should aggregate = ', { shouldBeAggregated, url: aTab.url });
+    }
+    catch(_e) {
+    }
+  }
 
   if (shouldBeAggregated !== null)
     return shouldBeAggregated;

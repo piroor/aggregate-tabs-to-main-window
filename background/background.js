@@ -181,7 +181,7 @@ async function shouldAggregateTab(aTab) {
     if (gAggregateTabsFromMatchedPattern) {
       const matched = gAggregateTabsFromMatchedPattern.test(opener.url);
       if (matched)
-          shouldBeAggregated = configs.aggregateTabsFromMatched;
+        shouldBeAggregated = configs.aggregateTabsFromMatched;
       log('matched opener, should aggregate = ', { shouldBeAggregated, gAggregateTabsFromMatchedPattern, url: opener.url });
     }
   }
@@ -189,7 +189,7 @@ async function shouldAggregateTab(aTab) {
   if (gAggregateTabsMatchedPattern) {
     const matched = gAggregateTabsMatchedPattern.test(aTab.url);
     if (matched)
-        shouldBeAggregated = configs.aggregateTabsMatched;
+      shouldBeAggregated = configs.aggregateTabsMatched;
     log('matched tab, should aggregate = ', { shouldBeAggregated, gAggregateTabsMatchedPattern, url: aTab.url });
   }
 

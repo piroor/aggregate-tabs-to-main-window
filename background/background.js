@@ -79,76 +79,75 @@ function updateDoNotAggregateTabsFromMatchedPattern() {
   }
 }
 
+browser.tabs.onCreated.addListener(async newTab => {
+  log('onCreated: tab: ', newTab);
 
-browser.tabs.onCreated.addListener(async aTab => {
-  log('onCreated: tab: ', aTab);
-
-  gCreatingTabs.add(aTab.id);
+  gCreatingTabs.add(newTab.id);
   setTimeout(async () => {
-    const tab = await browser.tabs.get(aTab.id);
-    if (!gCreatingTabs.has(aTab.id) ||
-        tab.url != aTab.url ||
+    const tab = await browser.tabs.get(newTab.id);
+    if (!gCreatingTabs.has(newTab.id) ||
+        tab.url != newTab.url ||
         tab.status != 'complete')
       return;
-    gCreatingTabs.delete(aTab.id);
+    gCreatingTabs.delete(newTab.id);
     log('delayed onCreated: tab: ', tab);
     tryAggregateTab(tab, {
       excludeLastTab: true
     });
   }, 100);
 
-  gOpeningTabs.push(aTab.id);
+  gOpeningTabs.push(newTab.id);
   await wait(configs.delayForMultipleNewTabs);
   if (gOpeningTabs.length > 1 &&
       Date.now() - gLsatCreatedAt < configs.delayForNewWindow) {
-    log(`tab ${aTab.id}: do nothing because multiple tabs are restored in an existing window`);
+    log(`tab ${newTab.id}: do nothing because multiple tabs are restored in an existing window`);
     await wait(100);
-    gOpeningTabs.splice(gOpeningTabs.indexOf(aTab.id), 1);
+    gOpeningTabs.splice(gOpeningTabs.indexOf(newTab.id), 1);
     return;
   }
-  gOpeningTabs.splice(gOpeningTabs.indexOf(aTab.id), 1);
+  gOpeningTabs.splice(gOpeningTabs.indexOf(newTab.id), 1);
 
-  if (Date.now() - gCreatedAt.get(aTab.windowId) < configs.delayForNewWindow) {
-    log(`tab ${aTab.id}: do nothing  because this window is opened with the tab explicitly (maybe a restored window)`);
+  if (Date.now() - gCreatedAt.get(newTab.windowId) < configs.delayForNewWindow) {
+    log(`tab ${newTab.id}: do nothing  because this window is opened with the tab explicitly (maybe a restored window)`);
     return;
   }
 
-  if (aTab.url == 'about:blank') {
+  if (newTab.url == 'about:blank') {
     log('ignore loading tab');
     return;
   }
 
-  tryAggregateTab(aTab, {
+  tryAggregateTab(newTab, {
     excludeLastTab: true
   });
 });
 
-browser.tabs.onUpdated.addListener(async (aTabId, aChangeInfo, aTab) => {
-  if (!aChangeInfo.url)
+browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  if (!changeInfo.url)
     return;
 
-  if (gCreatingTabs.has(aTabId)) {
-    log('delayed onCreated (onUpdated): tab: ', aTab);
-    gCreatingTabs.delete(aTabId);
-    tryAggregateTab(aTab, {
+  if (gCreatingTabs.has(tabId)) {
+    log('delayed onCreated (onUpdated): tab: ', tab);
+    gCreatingTabs.delete(tabId);
+    tryAggregateTab(tab, {
       excludeLastTab: true
     });
     return;
   }
 
-  log('checking for loading in an existing tab: ', { tab: aTab, changeInfo: aChangeInfo });
-  log(`tab ${aTab.id}: window.width = ${window.width}`);
-  if (!aTab.active ||
+  log('checking for loading in an existing tab: ', { tab: tab, changeInfo: changeInfo });
+  log(`tab ${tab.id}: window.width = ${window.width}`);
+  if (!tab.active ||
       !configs.redirectLoadingInCurrentTab ||
       window.width >= configs.redirectLoadingInCurrentTabMinWindowWidth)
     return;
 
-  const mainWindow = await getRedirectTargetWindowForTab(aTab);
+  const mainWindow = await getRedirectTargetWindowForTab(tab);
   if (!mainWindow)
     return;
 
   browser.tabs.create({
-    url:      aChangeInfo.url,
+    url:      changeInfo.url,
     active:   true,
     index:    mainWindow.tabs.length,
     windowId: mainWindow.id
@@ -159,43 +158,43 @@ const gCreatedAt = new Map();
 const gLastActive = new Map();
 let gLsatCreatedAt = 0;
 
-browser.windows.onCreated.addListener(aWindow => {
+browser.windows.onCreated.addListener(window => {
   const now = Date.now();
-  gCreatedAt.set(aWindow.id, now);
-  gLastActive.set(aWindow.id, now);
+  gCreatedAt.set(window.id, now);
+  gLastActive.set(window.id, now);
   gLsatCreatedAt = now;
 });
 
-browser.windows.onFocusChanged.addListener(aWindowId => {
-  gLastActive.set(aWindowId, Date.now());
+browser.windows.onFocusChanged.addListener(windowId => {
+  gLastActive.set(windowId, Date.now());
 });
 
-browser.windows.onRemoved.addListener(aWindowId => {
-  gCreatedAt.delete(aWindowId);
-  gLastActive.delete(aWindowId);
+browser.windows.onRemoved.addListener(windowId => {
+  gCreatedAt.delete(windowId);
+  gLastActive.delete(windowId);
 });
 
-async function tryAggregateTab(aTab, aOptions = {}) {
-  log('tryAggregateTab ', { tab: aTab, options: aOptions });
-  const shouldBeAggregated = await shouldAggregateTab(aTab);
+async function tryAggregateTab(tab, options = {}) {
+  log('tryAggregateTab ', { tab, options });
+  const shouldBeAggregated = await shouldAggregateTab(tab);
   if (!shouldBeAggregated)
     return;
 
-  const mainWindow = await getRedirectTargetWindowForTab(aTab, {
+  const mainWindow = await getRedirectTargetWindowForTab(tab, {
     excludeLastTab: true
   });
   if (!mainWindow)
     return;
 
-  await browser.tabs.move([aTab.id], {
+  await browser.tabs.move([tab.id], {
     index:    mainWindow.tabs.length,
     windowId: mainWindow.id
   });
-  browser.tabs.update(aTab.id, { active: true });
+  browser.tabs.update(tab.id, { active: true });
 }
 
-async function shouldAggregateTab(aTab) {
-  const opener = aTab.openerTabId && await browser.tabs.get(aTab.openerTabId);
+async function shouldAggregateTab(tab) {
+  const opener = tab.openerTabId && await browser.tabs.get(tab.openerTabId);
   let shouldBeAggregated = null;
   if (opener) {
     log('shouldAggregateTab: has opener');
@@ -224,22 +223,22 @@ async function shouldAggregateTab(aTab) {
 
   if (configs.aggregateTabsMatched) {
     if (gAggregateTabsMatchedPattern &&
-        gAggregateTabsMatchedPattern.test(aTab.url))
+        gAggregateTabsMatchedPattern.test(tab.url))
       shouldBeAggregated = true;
-    log('matched tab, should aggregate = ', { shouldBeAggregated, gAggregateTabsMatchedPattern, url: aTab.url });
+    log('matched tab, should aggregate = ', { shouldBeAggregated, gAggregateTabsMatchedPattern, url: tab.url });
   }
   if (configs.doNotAggregateTabsMatched) {
     if (gDoNotAggregateTabsMatchedPattern &&
-        gDoNotAggregateTabsMatchedPattern.test(aTab.url))
+        gDoNotAggregateTabsMatchedPattern.test(tab.url))
       shouldBeAggregated = false;
-    log('matched tab for exception, should aggregate = ', { shouldBeAggregated, gDoNotAggregateTabsMatchedPattern, url: aTab.url });
+    log('matched tab for exception, should aggregate = ', { shouldBeAggregated, gDoNotAggregateTabsMatchedPattern, url: tab.url });
   }
 
   if (configs.aggregateTabsForBookmarked) {
     try {
-      if ((await browser.bookmarks.search({ url: aTab.url })).length > 0) {
+      if ((await browser.bookmarks.search({ url: tab.url })).length > 0) {
         shouldBeAggregated = true;
-        log('bookmarked url, should aggregate = ', { shouldBeAggregated, url: aTab.url });
+        log('bookmarked url, should aggregate = ', { shouldBeAggregated, url: tab.url });
       }
     }
     catch(_e) {
@@ -253,22 +252,22 @@ async function shouldAggregateTab(aTab) {
   return configs.aggregateTabsAll;
 }
 
-async function getRedirectTargetWindowForTab(aTab, aOptions = {}) {
-  log(`getRedirectTargetWindowForTab: id = ${aTab.id}`, aTab);
+async function getRedirectTargetWindowForTab(tab, options = {}) {
+  log(`getRedirectTargetWindowForTab: id = ${tab.id}`, tab);
 
   const windows = (await browser.windows.getAll({
     populate:    true,
     windowTypes: ['normal']
-  })).filter(aWindow => aWindow.incognito == aTab.incognito);
+  })).filter(window => window.incognito == tab.incognito);
   log('windows: ', windows);
   if (windows.length <= 1) {
     log('do nothing because there is only one window');
     return null;
   }
 
-  const sourceWindow = windows.filter(aWindow => aWindow.id == aTab.windowId)[0];
+  const sourceWindow = windows.filter(window => window.id == tab.windowId)[0];
   log('sourceWindow: ', sourceWindow);
-  if (aOptions.excludeLastTab &&
+  if (options.excludeLastTab &&
       sourceWindow.tabs.length <= 1) {
     log('do nothing because it is a new window');
     return null;
@@ -276,7 +275,7 @@ async function getRedirectTargetWindowForTab(aTab, aOptions = {}) {
 
   const mainWindow = findMainWindowFrom(windows);
   log('mainWindow: ', mainWindow.id);
-  if (aTab.windowId == mainWindow.id) {
+  if (tab.windowId == mainWindow.id) {
     log('do nothing because it is the main window');
     return null;
   }
@@ -284,17 +283,17 @@ async function getRedirectTargetWindowForTab(aTab, aOptions = {}) {
 }
 
 const comparers = {
-  wider:    (aA, aB) => aB.width - aA.width,
-  taller:   (aA, aB) => aB.height - aA.height,
-  larger:   (aA, aB) => (aB.width * aB.height) - (aA.width * aA.height),
-  muchTabs: (aA, aB) => aB.tabs.length - aA.tabs.length,
-  recent:   (aA, aB) => (gLastActive.get(aB) || 0) - (gLastActive.get(aA) || 0),
+  wider:    (a, b) => b.width - a.width,
+  taller:   (a, b) => b.height - a.height,
+  larger:   (a, b) => (b.width * b.height) - (a.width * a.height),
+  muchTabs: (a, b) => b.tabs.length - a.tabs.length,
+  recent:   (a, b) => (gLastActive.get(b) || 0) - (gLastActive.get(a) || 0),
 };
 
-function findMainWindowFrom(aWindows) {
-  const windows = aWindows.slice(0).sort((aA, aB) => {
+function findMainWindowFrom(windows) {
+  windows = windows.slice(0).sort((a, b) => {
     for (let name of configs.activeComparers) {
-      const result = comparers[name](aA, aB);
+      const result = comparers[name](a, b);
       if (result !== 0)
         return result;
     }

@@ -1,6 +1,8 @@
 # History
 
  - master/HEAD
+ - 1.3.1 (2019.2.19)
+   * Don't aggregate duplicated and restored tabs by default.
  - 1.3.0 (2018.9.10)
    * Add ability to configure conditions of tabs to be moved.
  - 1.2.1 (2018.5.31)

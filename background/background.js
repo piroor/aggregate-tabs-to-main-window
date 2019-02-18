@@ -79,6 +79,69 @@ function updateDoNotAggregateTabsFromMatchedPattern() {
   }
 }
 
+
+const kPERSISTENT_ID = 'persistent-id';
+
+function handleMissingTabError(error) {
+  if (!error ||
+      !error.message ||
+      error.message.indexOf('Invalid tab ID:') != 0)
+    throw error;
+  // otherwise, this error is caused from a tab already closed.
+  // we just ignore it.
+  //console.log('Invalid Tab ID error on: ' + error.stack);
+}
+
+async function getUniqueTabId(tabId) {
+  let originalId    = null;
+  let originalTabId = null;
+  let duplicated    = false;
+
+  let oldId = await browser.sessions.getTabValue(tabId, kPERSISTENT_ID);
+  if (oldId && !oldId.tabId) // ignore broken information!
+    oldId = null;
+
+  if (oldId) {
+    // If the tab detected from stored tabId is different, it is duplicated tab.
+    try {
+      const tabWithOldId = await browser.tabs.get(oldId.tabId);
+      if (!tabWithOldId)
+        throw new Error(`Invalid tab ID: ${oldId.tabId}`);
+      originalId = await browser.sessions.getTabValue(oldId.tabId, kPERSISTENT_ID);
+      originalId = originalId && originalId.id;
+      duplicated = tabWithOldId.id != tabId && originalId == oldId.id;
+      if (duplicated)
+        originalTabId = oldId.tabId;
+      else
+        throw new Error(`Invalid tab ID: ${oldId.tabId}`);
+    }
+    catch(e) {
+      handleMissingTabError(e);
+      // It fails if the tab doesn't exist.
+      // There is no live tab for the tabId, thus
+      // this seems to be a tab restored from session.
+      // We need to update the related tab id.
+      await browser.sessions.setTabValue(tabId, kPERSISTENT_ID, {
+        id: oldId.id,
+        tabId
+      });
+      return {
+        id:            oldId.id,
+        originalId:    null,
+        originalTabId: oldId.tabId,
+        restored:      true
+      };
+    }
+  }
+
+  const randomValue = Math.floor(Math.random() * 1000);
+  const id          = `tab-${Date.now()}-${randomValue}`;
+  // tabId is for detecttion of duplicated tabs
+  await browser.sessions.setTabValue(tabId, kPERSISTENT_ID, { id, tabId });
+  return { id, originalId, originalTabId, duplicated };
+}
+
+
 browser.tabs.onCreated.addListener(async newTab => {
   log('onCreated: tab: ', newTab);
 
@@ -242,6 +305,21 @@ async function shouldAggregateTab(tab) {
       }
     }
     catch(_e) {
+    }
+  }
+
+  if (!configs.aggregateDuplicatedTabs ||
+      !configs.aggregateRestoredTabs) {
+    const uniqueId = await getUniqueTabId(tab.id);
+    if (uniqueId.duplicated &&
+        !configs.aggregateDuplicatedTabs) {
+      log('do not aggregate duplicated tab');
+      shouldBeAggregated = false;
+    }
+    if (uniqueId.restored &&
+        !configs.aggregateRestoredTabs) {
+      log('do not aggregate restored tab');
+      shouldBeAggregated = false;
     }
   }
 

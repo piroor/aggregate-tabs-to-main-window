@@ -38,6 +38,8 @@ configs = new Configs({
   doNotAggregateTabsMatched: false,
   doNotAggregateTabsMatchedPattern: '',
   aggregateTabsForBookmarked: true,
+  aggregateDuplicatedTabs: false,
+  aggregateRestoredTabs: false,
   aggregateTabsAll: true,
   redirectLoadingInCurrentTab: false,
   redirectLoadingInCurrentTabMinWindowWidth: 400,

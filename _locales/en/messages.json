@@ -14,6 +14,8 @@
   "config_aggregateTabsMatched_caption":       { "message": "Opened with a URL matching to the regular expression:" },
   "config_doNotAggregateTabsMatched_caption":  { "message": "Don't aggregate if it is matched to the regular expression:" },
   "config_aggregateTabsForBookmarked_caption": { "message": "Maybe opened from a bookmark" },
+  "config_aggregateDuplicatedTabs_caption":    { "message": "Duplicated tabs" },
+  "config_aggregateRestoredTabs_caption":      { "message": "Restored / Reopened tabs" },
   "config_aggregateTabsAll_caption":           { "message": "Any other case (tabs from external applications, etc.)" },
 
   "config_debug_caption": { "message": "Development" },

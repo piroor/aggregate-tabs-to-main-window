@@ -14,6 +14,8 @@
   "config_aggregateTabsMatched_caption":       { "message": "そのタブ自体のURLが以下の正規表現にマッチするタブ：" },
   "config_doNotAggregateTabsMatched_caption":  { "message": "ただし、以下の正規表現にマッチする場合を除く：" },
   "config_aggregateTabsForBookmarked_caption": { "message": "ブックマークから開かれたであろうタブ" },
+  "config_aggregateDuplicatedTabs_caption":    { "message": "複製されたタブ" },
+  "config_aggregateRestoredTabs_caption":      { "message": "閉じた後で開き直されたタブ" },
   "config_aggregateTabsAll_caption":           { "message": "その他の場合すべて（他のアプリケーションから開かれたタブなど）" },
 
   "config_debug_caption": { "message": "開発用" },

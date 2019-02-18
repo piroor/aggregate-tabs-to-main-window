@@ -5,24 +5,24 @@
 */
 'use strict';
 
-var configs;
-var gLogContext = '?';
+let configs;
+let gLogContext = '?';
 
-function log(aMessage, ...aArgs)
+function log(message, ...args)
 {
   if (!configs || !configs.debug)
     return;
 
-  var nest   = (new Error()).stack.split('\n').length;
-  var indent = '';
+  const nest = (new Error()).stack.split('\n').length;
+  let indent = '';
   for (let i = 0; i < nest; i++) {
     indent += ' ';
   }
-  console.log(`aggregate-tabs<${gLogContext}>: ${indent}${aMessage}`, ...aArgs);
+  console.log(`aggregate-tabs<${gLogContext}>: ${indent}${message}`, ...args);
 }
 
-function wait(aDelay) {
-  return new Promise((aResolve, aReject) => setTimeout(aResolve, aDelay));
+function wait(delay) {
+  return new Promise((resolve, reject) => setTimeout(resolve, delay));
 }
 
 configs = new Configs({
@@ -47,5 +47,5 @@ configs = new Configs({
 }, {
   localKeys: `
     debug
-  `.trim().split('\n').map(aKey => aKey.trim()).filter(aKey => aKey && aKey.indexOf('//') != 0)
+  `.trim().split('\n').map(key => key.trim()).filter(key => key && key.indexOf('//') != 0)
 });

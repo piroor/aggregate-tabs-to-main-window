@@ -6,10 +6,10 @@
 'use strict';
 
 gLogContext = 'Options';
-var options = new Options(configs);
+const options = new Options(configs);
 
-function onConfigChanged(aKey) {
-  switch (aKey) {
+function onConfigChanged(key) {
+  switch (key) {
     case 'debug':
       if (configs.debug)
         document.documentElement.classList.add('debugging');

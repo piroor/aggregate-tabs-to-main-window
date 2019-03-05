@@ -1,6 +1,7 @@
 # History
 
  - master/HEAD
+   * Add ability to export and import all configurations except keyboard shortcuts. (Options => "Development" => "Debug mode" => "All Configs" => "Import/Export")
  - 1.3.1 (2019.2.19)
    * Don't aggregate duplicated and restored tabs by default.
  - 1.3.0 (2018.9.10)

@@ -9,6 +9,7 @@ gLogContext = 'BG';
 
 const gOpeningTabs = [];
 const gCreatingTabs = new Set();
+const gTrackedWindows = new Set();
 
 let gAggregateTabsMatchedPattern = null;
 let gAggregateTabsFromMatchedPattern = null;
@@ -145,12 +146,16 @@ async function getUniqueTabId(tabId) {
 browser.tabs.onCreated.addListener(async newTab => {
   log('onCreated: tab: ', newTab);
 
+  const isNewWindow = gTrackedWindows.has(newTab.windowId);
+
+  gTrackedWindows.add(newTab.windowId);
   gCreatingTabs.add(newTab.id);
   setTimeout(async () => {
     const tab = await browser.tabs.get(newTab.id);
     if (!gCreatingTabs.has(newTab.id) ||
         tab.url != newTab.url ||
-        tab.status != 'complete')
+        tab.status != 'complete' ||
+        isNewWindow)
       return;
     gCreatingTabs.delete(newTab.id);
     log('delayed onCreated: tab: ', tab);
@@ -177,6 +182,11 @@ browser.tabs.onCreated.addListener(async newTab => {
 
   if (newTab.url == 'about:blank') {
     log('ignore loading tab');
+    return;
+  }
+
+  if (isNewWindow) {
+    log('ignore initial tab of a new window');
     return;
   }
 
@@ -235,6 +245,7 @@ browser.windows.onFocusChanged.addListener(windowId => {
 browser.windows.onRemoved.addListener(windowId => {
   gCreatedAt.delete(windowId);
   gLastActive.delete(windowId);
+  gTrackedWindows.delete(windowId);
 });
 
 async function tryAggregateTab(tab, options = {}) {

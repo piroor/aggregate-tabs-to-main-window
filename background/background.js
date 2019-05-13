@@ -383,6 +383,10 @@ function findMainWindowFrom(windows) {
   windows = windows.slice(0).sort((a, b) => {
     for (let name of configs.activeComparers) {
       const result = comparers[name](a, b);
+      const acceptableFudgeFactor = configs.acceptableFudgeFactors[name] || 0;
+      log('findMainWindowFrom: sorting ', { name, a: a.id, b: b.id, result, acceptableFudgeFactor });
+      if (Math.abs(result) <= acceptableFudgeFactor)
+        continue;
       if (result !== 0)
         return result;
     }

@@ -45,6 +45,12 @@ configs = new Configs({
   redirectLoadingInCurrentTabMinWindowWidth: 400,
   delayForMultipleNewTabs: 300,
   delayForNewWindow: 1000,
+  acceptableFudgeFactors: {
+    wider:    5,
+    taller:   5,
+    muchTabs: 0,
+    recent:   0
+  },
   debug: false
 }, {
   localKeys: `

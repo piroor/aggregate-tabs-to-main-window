@@ -1,6 +1,9 @@
 # History
 
  - master/HEAD
+ - 1.3.3 (2019.5.13)
+   * Ignore difference of windowsize smaller than 5 pixels.
+   * Detect the main window based on their size at first, isntead of the number of tabs. (Revert the cange on the previous version.)
  - 1.3.2 (2019.5.4)
    * Detect the main window based on the number of tabs at first.
    * Don't aggregate tabs opened as the initial tab of a new window.

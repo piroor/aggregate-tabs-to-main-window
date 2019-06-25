@@ -11,4 +11,15 @@ before_script:
   - make install_extlib
 script:
   - make lint
-
+before_deploy:
+  - make
+deploy:
+  provider: releases
+  api_key:
+    secure: "qQXkkPoNz+wqjyrsckbfO+6mq9fdk0Qkp2BDGQDwly0E4QRedUPTf5wkY5Ohjafvm+6ATVR0m6AhdXFevV5OvacNPvZrCBzDoAFLzWAHxaxzUHrgT+90UpJsoDlP1DnJ4/MoRvGuPnJbVORd2Z2nj4oG9BAmgjynSshOVv0W+A5rTJRfvuPP+EhTIphQDncXbUCwch3XuaLoi2SxrhnLt1lOIQ10toOXR8/rDdwf7mBS8eytpQzzAxaHyDTcCIJAMXGyMAYfW98eCxZ3i0FxjeJi8L3Z6yOJ94q0fawpPo/8UsAqfcAoKzIui3ZEmPc5Gn9VfAj7kulLyHhPg0ow4s3H5+bca6owpACHrf1rBM22PdGbbg0rMQ2kLJdaCArTLnBlI6GjIUYryfG0LKqZg6cBufAa2KrWEh2aa/Ao+yZVuQRK1SJP3AWL0KFk6l2877pCtEmumfjvCyPOhJHaL2SqOioS6qFoSXp20weXXe/KZ987tIBOirkKv+CxB3lMIrlrGMOqAVU875Fyuvdu2dFYhysKKlLzPi8odcSIGNcOoz3RuuDnfvLANTRibwBgr8Ib3ZRrXv0aw6VYGYwalrxNnePcVVZXV+GZcFwdZaAmarFFOF9rMeutdgcHpwxktmVDFjMYTJYeDOQek8Zk9zkNvNHz8v4/3mpj9r6OtSA="
+  file:
+    - aggregate-tabs-to-main-window.xpi
+  skip_cleanup: true
+  on:
+    repo: piroor/aggregate-tabs-to-main-window
+    tags: true

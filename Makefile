@@ -21,7 +21,7 @@ xpi: update_extlib install_extlib lint
 	cp submodules/webextensions-lib-l10n/l10n.js extlib/
 	cp submodules/webextensions-lib-options/Options.js extlib/
 	rm -f ./*.xpi
-	zip -r -0 aggregate-tabs-to-main-window.xpi manifest.json _locales common background options extlib -x '*/.*' >/dev/null 2>/dev/null
+	zip -r -9 aggregate-tabs-to-main-window.xpi manifest.json _locales common background options extlib -x '*/.*' >/dev/null 2>/dev/null
 
 update_extlib:
 	git submodule update --init

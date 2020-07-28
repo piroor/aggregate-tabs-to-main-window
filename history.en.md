@@ -1,6 +1,10 @@
 # History
 
  - master/HEAD
+ - 1.4 (2020.7.29)
+   * Detect URL of tabs opened from external applications more correctly.
+   * Detect tabs opened from bookmarks more correctly.
+   * Drop support for versions of Firefox older than 68.
  - 1.3.3 (2019.5.13)
    * Ignore difference of windowsize smaller than 5 pixels.
    * Detect the main window based on their size at first, isntead of the number of tabs. (Revert the cange on the previous version.)

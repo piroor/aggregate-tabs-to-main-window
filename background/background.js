@@ -180,18 +180,21 @@ browser.tabs.onCreated.addListener(async newTab => {
     return;
   }
 
-  if (newTab.url == 'about:blank') {
-    log('ignore loading tab');
-    return;
-  }
-
   if (isNewWindow) {
     log('ignore initial tab of a new window');
     return;
   }
 
+  const bookmarked = await isBookmarked(newTab);
+  if (!bookmarked &&
+      newTab.url == 'about:blank') {
+    log('ignore loading tab');
+    return;
+  }
+
   tryAggregateTab(newTab, {
-    excludeLastTab: true
+    excludeLastTab: true,
+    bookmarked
   });
 });
 
@@ -254,9 +257,9 @@ browser.windows.onRemoved.addListener(windowId => {
   gTrackedWindows.delete(windowId);
 });
 
-async function tryAggregateTab(tab, options = {}) {
-  log('tryAggregateTab ', { tab, options });
-  const shouldBeAggregated = await shouldAggregateTab(tab);
+async function tryAggregateTab(tab, { bookmarked, ...options } = {}) {
+  log('tryAggregateTab ', { tab, bookmarked, options });
+  const shouldBeAggregated = await shouldAggregateTab(tab, { bookmarked });
   if (!shouldBeAggregated)
     return;
 
@@ -273,7 +276,7 @@ async function tryAggregateTab(tab, options = {}) {
   browser.tabs.update(tab.id, { active: true });
 }
 
-async function shouldAggregateTab(tab) {
+async function shouldAggregateTab(tab, { bookmarked } = {}) {
   const opener = tab.openerTabId && await browser.tabs.get(tab.openerTabId);
   let shouldBeAggregated = null;
   if (opener) {
@@ -314,34 +317,14 @@ async function shouldAggregateTab(tab) {
     log('matched tab for exception, should aggregate = ', { shouldBeAggregated, gDoNotAggregateTabsMatchedPattern, url: tab.url });
   }
 
-  const bookmarks = (await Promise.all([
-    browser.bookmarks.search({ url: tab.url }),
-    (async () => {
-      try {
-        const bookmarks = await browser.bookmarks.search({ url: `http://${tab.title}` });
-        return bookmarks;
-      }
-      catch(_e) {
-      }
-      return [];
-    })(),
-    (async () => {
-      try {
-        const bookmarks = await browser.bookmarks.search({ url: `https://${tab.title}` });
-        return bookmarks;
-      }
-      catch(_e) {
-      }
-      return [];
-    })()
-  ])).flat();
-  if (bookmarks.length > 0) {
+  if (bookmarked === undefined ? (await isBookmarked(tab)) : bookmarked) {
     shouldBeAggregated = configs.aggregateTabsForBookmarked;
     log('bookmarked url, should aggregate = ', { shouldBeAggregated, url: tab.url });
   }
 
-  if (!configs.aggregateDuplicatedTabs ||
-      !configs.aggregateRestoredTabs) {
+  if (shouldBeAggregated &&
+      (!configs.aggregateDuplicatedTabs ||
+       !configs.aggregateRestoredTabs)) {
     const uniqueId = await getUniqueTabId(tab.id);
     if (uniqueId.duplicated &&
         !configs.aggregateDuplicatedTabs) {
@@ -360,6 +343,36 @@ async function shouldAggregateTab(tab) {
 
   log('default case, should aggregate = ', configs.aggregateTabsAll);
   return configs.aggregateTabsAll;
+}
+
+async function isBookmarked(tab) {
+  try {
+    const bookmarks = (await Promise.all([
+      browser.bookmarks.search({ url: tab.url }),
+      (async () => {
+        try {
+          const bookmarks = await browser.bookmarks.search({ url: `http://${tab.title}` });
+          return bookmarks;
+        }
+        catch(_e) {
+        }
+        return [];
+      })(),
+      (async () => {
+        try {
+          const bookmarks = await browser.bookmarks.search({ url: `https://${tab.title}` });
+          return bookmarks;
+        }
+        catch(_e) {
+        }
+        return [];
+      })()
+    ])).flat();
+    return bookmarks.length > 0;
+  }
+  catch(_e) {
+  }
+  return false;
 }
 
 async function getRedirectTargetWindowForTab(tab, options = {}) {

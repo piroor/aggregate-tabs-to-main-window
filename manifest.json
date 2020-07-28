@@ -25,7 +25,7 @@
   "applications": {
     "gecko": {
       "id": "aggregate-tabs-to-main-window@piro.sakura.ne.jp",
-      "strict_min_version": "57.0"
+      "strict_min_version": "68.0"
     }
   }
 }

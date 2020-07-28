@@ -348,7 +348,7 @@ async function shouldAggregateTab(tab, { bookmarked } = {}) {
 async function isBookmarked(tab) {
   try {
     const bookmarks = (await Promise.all([
-      browser.bookmarks.search({ url: tab.url }),
+      //browser.bookmarks.search({ url: tab.url }),
       (async () => {
         try {
           const bookmarks = await browser.bookmarks.search({ url: `http://${tab.title}` });

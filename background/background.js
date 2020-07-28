@@ -200,6 +200,12 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     return;
 
   if (gCreatingTabs.has(tabId)) {
+    // New tab opened from command line is initially opened with "about:blank"
+    // and loaded the requested URL after that. We need to ignore such a
+    // "complete" event.
+    if (changeInfo.status == 'complete' &&
+        changeInfo.url == 'about:blank')
+      return;
     log('delayed onCreated (onUpdated): tab: ', tab);
     gCreatingTabs.delete(tabId);
     tryAggregateTab(tab, {

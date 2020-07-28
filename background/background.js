@@ -314,15 +314,30 @@ async function shouldAggregateTab(tab) {
     log('matched tab for exception, should aggregate = ', { shouldBeAggregated, gDoNotAggregateTabsMatchedPattern, url: tab.url });
   }
 
-  if (configs.aggregateTabsForBookmarked) {
-    try {
-      if ((await browser.bookmarks.search({ url: tab.url })).length > 0) {
-        shouldBeAggregated = true;
-        log('bookmarked url, should aggregate = ', { shouldBeAggregated, url: tab.url });
+  const bookmarks = (await Promise.all([
+    browser.bookmarks.search({ url: tab.url }),
+    (async () => {
+      try {
+        const bookmarks = await browser.bookmarks.search({ url: `http://${tab.title}` });
+        return bookmarks;
       }
-    }
-    catch(_e) {
-    }
+      catch(_e) {
+      }
+      return [];
+    })(),
+    (async () => {
+      try {
+        const bookmarks = await browser.bookmarks.search({ url: `https://${tab.title}` });
+        return bookmarks;
+      }
+      catch(_e) {
+      }
+      return [];
+    })()
+  ])).flat();
+  if (bookmarks.length > 0) {
+    shouldBeAggregated = configs.aggregateTabsForBookmarked;
+    log('bookmarked url, should aggregate = ', { shouldBeAggregated, url: tab.url });
   }
 
   if (!configs.aggregateDuplicatedTabs ||

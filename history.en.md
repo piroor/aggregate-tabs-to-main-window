@@ -1,6 +1,7 @@
 # History
 
  - master/HEAD
+   * Fix wrong behaviors of "All Configs" UI: apply imported configs to options UI immediately and treat decimal values as valid for some numeric options.
  - 1.4 (2020.7.29)
    * Detect URL of tabs opened from external applications more correctly.
    * Detect tabs opened from bookmarks more correctly.

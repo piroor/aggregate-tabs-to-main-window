@@ -1,6 +1,6 @@
 # aggregate-tabs-to-main-window
 
-[![Build Status](https://travis-ci.org/piroor/aggregate-tabs-to-main-window.svg?branch=trunk)](https://travis-ci.org/piroor/aggregate-tabs-to-main-window)
+![Build Status](https://github.com/piroor/aggregate-tabs-to-main-window/actions/workflows/main.yml/badge.svg?branch=trunk)
 
 Aggregates new tabs to a window which has most many tabs and largest size.
 

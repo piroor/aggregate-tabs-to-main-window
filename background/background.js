@@ -391,8 +391,8 @@ async function getRedirectTargetWindowForTab(tab, options = {}) {
   const sourceWindow = windows.filter(window => window.id == tab.windowId)[0];
   log('sourceWindow: ', sourceWindow);
   if (options.excludeLastTab &&
-      sourceWindow &&
-      sourceWindow.tabs.length <= 1) {
+      (!sourceWindow ||
+       sourceWindow.tabs.length <= 1)) {
     log('do nothing because it is a new window');
     return null;
   }

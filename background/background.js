@@ -217,17 +217,33 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     return;
   }
 
+  if (!configs.redirectLoadingInCurrentTab)
+    return;
+
   log('checking for loading in an existing tab: ', { tab: tab, changeInfo: changeInfo });
+
+  if (!tab.active) {
+    log(' => ignore loading in a background tab');
+    return;
+  }
+
+  const [window, mainWindow] = await Promise.all([
+    browser.windows.get(tab.windowId),
+    getRedirectTargetWindowForTab(tab),
+  ]);
+
+  if (!mainWindow) {
+    log(' => fatal: no main window!');
+    return;
+  }
+
   log(`tab ${tab.id}: window.width = ${window.width}`);
-  if (!tab.active ||
-      !configs.redirectLoadingInCurrentTab ||
-      window.width >= configs.redirectLoadingInCurrentTabMinWindowWidth)
+  if (window.width >= configs.redirectLoadingInCurrentTabMinWindowWidth) {
+    log(` => ignore loading in a window larger than ${configs.redirectLoadingInCurrentTabMinWindowWidth}`);
     return;
+  }
 
-  const mainWindow = await getRedirectTargetWindowForTab(tab);
-  if (!mainWindow)
-    return;
-
+  log(` => aggregate to the window ${mainWindow.id}`);
   browser.tabs.create({
     url:      changeInfo.url,
     active:   true,

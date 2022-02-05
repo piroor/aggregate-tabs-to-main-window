@@ -10,6 +10,7 @@ gLogContext = 'BG';
 const gOpeningTabs = [];
 const gCreatingTabs = new Set();
 const gTrackedWindows = new Set();
+const gInitialTabIdsInWindow = new Map();
 
 let gAggregateTabsMatchedPattern = null;
 let gAggregateTabsFromMatchedPattern = null;
@@ -37,6 +38,16 @@ configs.$addObserver(key => {
     case 'doNotAggregateTabsFromMatchedPattern':
       updateDoNotAggregateTabsFromMatchedPattern();
       break;
+  }
+});
+
+browser.windows.getAll({
+  windowTypes: ['normal']
+}).then(windows => {
+  const now = Date.now();
+  for (const window of windows) {
+    gTrackedWindows.add(window.id);
+    gCreatedAt.set(window.id, now);
   }
 });
 
@@ -144,9 +155,18 @@ async function getUniqueTabId(tabId) {
 
 
 browser.tabs.onCreated.addListener(async newTab => {
-  log('onCreated: tab: ', newTab);
+  const isNewWindow = !gTrackedWindows.has(newTab.windowId);
+  const now = Date.now();
+  const deltaFromWindowCreated = now - (gCreatedAt.get(newTab.windowId) || now);
+  const initialTab = isNewWindow || deltaFromWindowCreated < configs.delayForNewWindow;
 
-  const isNewWindow = gTrackedWindows.has(newTab.windowId);
+  log('onCreated: tab: ', newTab, { isNewWindow, deltaFromWindowCreated, initialTab });
+
+  if (initialTab) {
+    const initialTabIds = gInitialTabIdsInWindow.get(newTab.windowId) || new Set();
+    initialTabIds.add(newTab.id);
+    gInitialTabIdsInWindow.set(newTab.windowId, initialTabIds);
+  }
 
   gTrackedWindows.add(newTab.windowId);
   gCreatingTabs.add(newTab.id);
@@ -155,7 +175,7 @@ browser.tabs.onCreated.addListener(async newTab => {
     if (!gCreatingTabs.has(newTab.id) ||
         tab.url != newTab.url ||
         tab.status != 'complete' ||
-        isNewWindow)
+        initialTab)
       return;
     gCreatingTabs.delete(newTab.id);
     log('delayed onCreated: tab: ', tab);
@@ -175,13 +195,12 @@ browser.tabs.onCreated.addListener(async newTab => {
   }
   gOpeningTabs.splice(gOpeningTabs.indexOf(newTab.id), 1);
 
-  if (Date.now() - gCreatedAt.get(newTab.windowId) < configs.delayForNewWindow) {
-    log(`tab ${newTab.id}: do nothing  because this window is opened with the tab explicitly (maybe a restored window)`);
-    return;
-  }
-
   if (isNewWindow) {
     log('ignore initial tab of a new window');
+    return;
+  }
+  if (initialTab) {
+    log(`tab ${newTab.id}: do nothing  because this window is opened with the tab explicitly (maybe a restored window)`);
     return;
   }
 
@@ -198,16 +217,25 @@ browser.tabs.onCreated.addListener(async newTab => {
   });
 });
 
+browser.tabs.onRemoved.addListener((tabId, removeInfo) => {
+  const initialTabIds = gInitialTabIdsInWindow.get(removeInfo.windowId) || new Set();
+  initialTabIds.delete(tabId);
+});
+
 browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (!changeInfo.url)
     return;
 
+  const initialTabIds = gInitialTabIdsInWindow.get(tab.windowId) || new Set();
+
   if (gCreatingTabs.has(tabId)) {
+    log('onUpdated: ', tab, changeInfo, { initialTab: initialTabIds.has(tabId) });
     // New tab opened from command line is initially opened with "about:blank"
     // and loaded the requested URL after that. We need to ignore such a
-    // "complete" event.
-    if (changeInfo.status == 'complete' &&
-        changeInfo.url == 'about:blank')
+    // "loading" or "complete" event.
+    if ((changeInfo.status &&
+         changeInfo.url == 'about:blank') ||
+        initialTabIds.has(tabId))
       return;
     log('delayed onCreated (onUpdated): tab: ', tab);
     gCreatingTabs.delete(tabId);
@@ -216,6 +244,8 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     });
     return;
   }
+
+  initialTabIds.delete(tabId);
 
   if (!configs.redirectLoadingInCurrentTab)
     return;
@@ -271,6 +301,7 @@ browser.windows.onRemoved.addListener(windowId => {
   gCreatedAt.delete(windowId);
   gLastActive.delete(windowId);
   gTrackedWindows.delete(windowId);
+  gInitialTabIdsInWindow.delete(windowId);
 });
 
 async function tryAggregateTab(tab, { bookmarked, ...options } = {}) {

@@ -170,13 +170,20 @@ browser.tabs.onCreated.addListener(async newTab => {
 
   gTrackedWindows.add(newTab.windowId);
   gCreatingTabs.add(newTab.id);
-  setTimeout(async () => {
+  let retryCount = 0;
+  setTimeout(async function delayedOnCreated() {
     const tab = await browser.tabs.get(newTab.id);
+    log(`delayedOnCreated ${retryCount} `, tab);
     if (!gCreatingTabs.has(newTab.id) ||
         tab.url != newTab.url ||
         tab.status != 'complete' ||
         initialTab)
       return;
+    if (tab.url == 'about:blank' &&
+        retryCount++ < 10) {
+      setTimeout(delayedOnCreated, 100);
+      return;
+    }
     gCreatingTabs.delete(newTab.id);
     log('delayed onCreated: tab: ', tab);
     tryAggregateTab(tab, {

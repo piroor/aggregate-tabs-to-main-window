@@ -16,6 +16,7 @@ let gAggregateTabsMatchedPattern = null;
 let gAggregateTabsFromMatchedPattern = null;
 let gDoNotAggregateTabsMatchedPattern = null;
 let gDoNotAggregateTabsFromMatchedPattern = null;
+let gAnyWindowHasFocus = true;
 
 configs.$loaded.then(() => {
   updateAggregateTabsMatchedPattern();
@@ -159,6 +160,7 @@ browser.tabs.onCreated.addListener(async newTab => {
   const now = Date.now();
   const deltaFromWindowCreated = now - (gCreatedAt.get(newTab.windowId) || now);
   const initialTab = isNewWindow || deltaFromWindowCreated < configs.delayForNewWindow;
+  const mayFromExternalApp = !gAnyWindowHasFocus;
 
   log('onCreated: tab: ', newTab, { isNewWindow, deltaFromWindowCreated, initialTab });
 
@@ -187,7 +189,8 @@ browser.tabs.onCreated.addListener(async newTab => {
     gCreatingTabs.delete(newTab.id);
     log('delayed onCreated: tab: ', tab);
     tryAggregateTab(tab, {
-      excludeLastTab: true
+      excludeLastTab: true,
+      mayFromExternalApp,
     });
   }, 100);
 
@@ -220,7 +223,8 @@ browser.tabs.onCreated.addListener(async newTab => {
 
   tryAggregateTab(newTab, {
     excludeLastTab: true,
-    bookmarked
+    bookmarked,
+    mayFromExternalApp,
   });
 });
 
@@ -247,7 +251,7 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     log('delayed onCreated (onUpdated): tab: ', tab);
     gCreatingTabs.delete(tabId);
     tryAggregateTab(tab, {
-      excludeLastTab: true
+      excludeLastTab: true,
     });
     return;
   }
@@ -301,6 +305,10 @@ browser.windows.onCreated.addListener(window => {
 });
 
 browser.windows.onFocusChanged.addListener(windowId => {
+  log(`windows.onFocusChanged: ${windowId}`);
+  gAnyWindowHasFocus = windowId != browser.windows.WINDOW_ID_NONE;
+  if (!gAnyWindowHasFocus)
+    return;
   gLastActive.set(windowId, Date.now());
 });
 
@@ -311,9 +319,12 @@ browser.windows.onRemoved.addListener(windowId => {
   gInitialTabIdsInWindow.delete(windowId);
 });
 
-async function tryAggregateTab(tab, { bookmarked, ...options } = {}) {
+async function tryAggregateTab(tab, { bookmarked, mayFromExternalApp, ...options } = {}) {
   log('tryAggregateTab ', { tab, bookmarked, options });
-  const shouldBeAggregated = await shouldAggregateTab(tab, { bookmarked });
+  const shouldBeAggregated = await shouldAggregateTab(tab, {
+    bookmarked,
+    mayFromExternalApp,
+  });
   if (!shouldBeAggregated)
     return;
 
@@ -330,7 +341,7 @@ async function tryAggregateTab(tab, { bookmarked, ...options } = {}) {
   browser.tabs.update(tab.id, { active: true });
 }
 
-async function shouldAggregateTab(tab, { bookmarked } = {}) {
+async function shouldAggregateTab(tab, { bookmarked, fromExternalApp } = {}) {
   const opener = tab.openerTabId && await browser.tabs.get(tab.openerTabId);
   let shouldBeAggregated = null;
   if (opener) {
@@ -374,6 +385,12 @@ async function shouldAggregateTab(tab, { bookmarked } = {}) {
   if (bookmarked === undefined ? (await isBookmarked(tab)) : bookmarked) {
     shouldBeAggregated = configs.aggregateTabsForBookmarked;
     log('bookmarked url, should aggregate = ', { shouldBeAggregated, url: tab.url });
+  }
+
+  if (configs.aggregateTabsFromExternalApp &&
+      fromExternalApp) {
+    log('tab from external app, should aggregate');
+    shouldBeAggregated = true;
   }
 
   if (shouldBeAggregated &&

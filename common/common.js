@@ -40,6 +40,7 @@ configs = new Configs({
   aggregateTabsForBookmarked: true,
   aggregateDuplicatedTabs: false,
   aggregateRestoredTabs: false,
+  aggregateTabsFromExternalApp: true,
   aggregateTabsAll: true,
   redirectLoadingInCurrentTab: false,
   redirectLoadingInCurrentTabMinWindowWidth: 400,

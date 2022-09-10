@@ -16,7 +16,8 @@
   "config_aggregateTabsForBookmarked_caption": { "message": "ブックマークから開かれたであろうタブ" },
   "config_aggregateDuplicatedTabs_caption":    { "message": "複製されたタブ" },
   "config_aggregateRestoredTabs_caption":      { "message": "閉じた後で開き直されたタブ" },
-  "config_aggregateTabsAll_caption":           { "message": "その他の場合すべて（他のアプリケーションから開かれたタブなど）" },
+  "config_aggregateTabsFromExternalApp_caption": { "message": "他のアプリケーションから開かれたであろうタブ" },
+  "config_aggregateTabsAll_caption":           { "message": "その他の場合すべて" },
 
   "config_debug_caption": { "message": "開発用" },
   "config_debug_label": { "message": "デバッグモード" },

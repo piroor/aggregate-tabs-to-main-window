@@ -7,6 +7,10 @@
 
 gLogContext = 'BG';
 
+const kMARKED_AS_MAIN_WINDOW = 'marked-as-main-window';
+const kMARKED                = 'true';
+let mMarkedMainWindowId = browser.windows.WINDOW_ID_NONE;
+
 const gOpeningTabs = [];
 const gCreatingTabs = new Set();
 const gTrackedWindows = new Set();
@@ -49,8 +53,66 @@ browser.windows.getAll({
   for (const window of windows) {
     gTrackedWindows.add(window.id);
     gCreatedAt.set(window.id, now);
+    browser.sessions.getWindowValue(window.id, kMARKED_AS_MAIN_WINDOW)
+      .then(value => {
+        if (value == kMARKED)
+          markWindowAsMain(window.id)
+      });
   }
 });
+
+
+async function markWindowAsMain(windowId) {
+  mMarkedMainWindowId = windowId;
+
+  const windows = await browser.windows.getAll();
+  await Promise.all(windows.map(async window => {
+    if (window.id == mMarkedMainWindowId)
+      return Promise.all([
+        browser.sessions.setWindowValue(window.id, kMARKED_AS_MAIN_WINDOW, kMARKED),
+        browser.browserAction.setTitle({
+          windowId: window.id,
+          title:    browser.i18n.getMessage('browserAction_active'),
+        }),
+        browser.browserAction.setIcon({
+          windowId: window.id,
+          path:     { 16: '/resources/pinned.svg' },
+        }),
+      ]);
+    else
+      return clearMark(window.id);
+  }));
+}
+
+async function clearMarks() {
+  mMarkedMainWindowId = browser.windows.WINDOW_ID_NONE;
+
+  const windows = await browser.windows.getAll();
+  await Promise.all(windows.map(window => clearMark(window.id)));
+}
+
+async function clearMark(windowId) {
+  return Promise.all([
+    browser.sessions.removeWindowValue(windowId, kMARKED_AS_MAIN_WINDOW),
+    browser.browserAction.setTitle({
+      windowId: windowId,
+      title:    browser.i18n.getMessage('browserAction_inactive'),
+    }),
+    browser.browserAction.setIcon({
+      windowId: windowId,
+      path:     { 16: '/resources/unpinned.svg' },
+    }),
+  ]);
+}
+
+function onToolbarButtonClick(tab) {
+  if (mMarkedMainWindowId == tab.windowId)
+    clearMarks();
+  else
+    markWindowAsMain(tab.windowId);
+}
+browser.browserAction.onClicked.addListener(onToolbarButtonClick);
+
 
 function updateAggregateTabsMatchedPattern() {
   try {
@@ -302,6 +364,12 @@ browser.windows.onCreated.addListener(window => {
   gCreatedAt.set(window.id, now);
   gLastActive.set(window.id, now);
   gLsatCreatedAt = now;
+
+  browser.sessions.getWindowValue(window.id, kMARKED_AS_MAIN_WINDOW)
+    .then(value => {
+      if (value == kMARKED)
+        markWindowAsMain(window.id)
+    });
 });
 
 browser.windows.onFocusChanged.addListener(windowId => {
@@ -486,6 +554,12 @@ const comparers = {
 };
 
 function findMainWindowFrom(windows) {
+  const marked = windows.find(window => window.id == mMarkedMainWindowId);
+  if (marked) {
+    log('findMainWindowFrom: marked as main: ', marked.id);
+    return marked;
+  }
+
   windows = windows.slice(0).sort((a, b) => {
     for (let name of configs.activeComparers) {
       const result = comparers[name](a, b);

@@ -2,6 +2,9 @@
   "extensionName": { "message": "Aggregate Tabs to Main Window" },
   "extensionDescription": { "message": "Aggregate new tabs to a window which has most many tabs and largest size." },
 
+  "browserAction_inactive": { "message": "Not marked as Main Window" },
+  "browserAction_active": { "message": "Marked as Main Window" },
+
   "config_sidebar_caption": { "message": "Sidebar Only Window" },
   "config_redirectLoadingInCurrentTabMinWindowWidth_label_before": { "message": "Treat windows as Sidebar Only Window if smaller than " },
   "config_redirectLoadingInCurrentTabMinWindowWidth_label_after": { "message": "px width, and open new tab in the main window when any URL is loaded in the current tab of a Sidebar Only Window" },

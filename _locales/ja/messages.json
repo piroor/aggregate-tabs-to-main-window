@@ -5,6 +5,12 @@
   "browserAction_inactive": { "message": "メインウィンドウとしてマークされていません" },
   "browserAction_active": { "message": "メインウィンドウとしてマークされています" },
 
+  "config_appearance_caption": { "message": "外観" },
+  "config_iconColor_caption": { "message": "ツールバーアイコンの色:" },
+  "config_iconColor_auto":    { "message": "自動" },
+  "config_iconColor_bright":  { "message": "明るいテーマ用" },
+  "config_iconColor_dark":    { "message": "暗いテーマ用" },
+
   "config_sidebar_caption": { "message": "サイドバー表示用ウィンドウ" },
   "config_redirectLoadingInCurrentTabMinWindowWidth_label_before": { "message": "\u200b" },
   "config_redirectLoadingInCurrentTabMinWindowWidth_label_after": { "message": "ピクセルよりも幅が狭いウィンドウをサイドバー表示用ウィンドウと見なし、ページが現在のタブに読み込まれたらメインウィンドウで新しいタブとして開く" },

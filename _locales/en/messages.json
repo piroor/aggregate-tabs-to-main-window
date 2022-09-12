@@ -5,6 +5,12 @@
   "browserAction_inactive": { "message": "Not marked as Main Window" },
   "browserAction_active": { "message": "Marked as Main Window" },
 
+  "config_appearance_caption": { "message": "Appearance" },
+  "config_iconColor_caption": { "message": "Toolbar Icon Color:" },
+  "config_iconColor_auto":    { "message": "Auto" },
+  "config_iconColor_bright":  { "message": "for Bright Theme" },
+  "config_iconColor_dark":    { "message": "for Dark Theme" },
+
   "config_sidebar_caption": { "message": "Sidebar Only Window" },
   "config_redirectLoadingInCurrentTabMinWindowWidth_label_before": { "message": "Treat windows as Sidebar Only Window if smaller than " },
   "config_redirectLoadingInCurrentTabMinWindowWidth_label_after": { "message": "px width, and open new tab in the main window when any URL is loaded in the current tab of a Sidebar Only Window" },

@@ -26,6 +26,7 @@ function wait(delay) {
 }
 
 configs = new Configs({
+  iconColor: 'auto',
   activeComparers: ['wider', 'taller', 'muchTabs', 'recent'],
   aggregateTabsFromPinned: true,
   aggregateTabsFromUnpinned: true,

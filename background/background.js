@@ -43,24 +43,35 @@ configs.$addObserver(key => {
     case 'doNotAggregateTabsFromMatchedPattern':
       updateDoNotAggregateTabsFromMatchedPattern();
       break;
+    case 'iconColor':
+      updateIconForBrowserTheme();
+      break;
   }
 });
 
 browser.windows.getAll({
   windowTypes: ['normal']
-}).then(windows => {
+}).then(async windows => {
   const now = Date.now();
-  for (const window of windows) {
+  let mainWindow = null;
+  await Promise.all(windows.map(async window => {
     gTrackedWindows.add(window.id);
     gCreatedAt.set(window.id, now);
-    browser.sessions.getWindowValue(window.id, kMARKED_AS_MAIN_WINDOW)
-      .then(value => {
-        if (value == kMARKED)
-          markWindowAsMain(window.id)
-      });
-  }
+    const state = await browser.sessions.getWindowValue(window.id, kMARKED_AS_MAIN_WINDOW);
+    if (state == kMARKED)
+      mainWindow = window;
+  }));
+  await updateIconForBrowserTheme();
+  if (mainWindow)
+    await markWindowAsMain(mainWindow.id);
 });
 
+
+const ORIGINAL_ICON_FOR_STATE = {
+  marked:  '/resources/pinned.svg',
+  default: '/resources/unpinned.svg',
+};
+const ICON_FOR_STATE = JSON.parse(JSON.stringify(ORIGINAL_ICON_FOR_STATE));
 
 async function markWindowAsMain(windowId) {
   mMarkedMainWindowId = windowId;
@@ -76,7 +87,7 @@ async function markWindowAsMain(windowId) {
         }),
         browser.browserAction.setIcon({
           windowId: window.id,
-          path:     { 16: '/resources/pinned.svg' },
+          path:     { 16: ICON_FOR_STATE.marked },
         }),
       ]);
     else
@@ -100,7 +111,7 @@ async function clearMark(windowId) {
     }),
     browser.browserAction.setIcon({
       windowId: windowId,
-      path:     { 16: '/resources/unpinned.svg' },
+      path:     { 16: ICON_FOR_STATE.default },
     }),
   ]);
 }
@@ -112,6 +123,76 @@ function onToolbarButtonClick(tab) {
     markWindowAsMain(tab.windowId);
 }
 browser.browserAction.onClicked.addListener(onToolbarButtonClick);
+
+
+const mDarkModeMatchMedia = window.matchMedia('(prefers-color-scheme: dark)');
+
+async function updateIconForBrowserTheme(theme) {
+  // generate icons with theme specific color
+  switch (configs.iconColor) {
+    case 'auto': {
+      if (!theme) {
+        const window = await browser.windows.getLastFocused();
+        theme = await browser.theme.getCurrent(window.id);
+      }
+
+      log('updateIconForBrowserTheme: colors: ', theme.colors);
+      if (theme.colors) {
+        const actionIconColor = theme.colors.icons || theme.colors.toolbar_text || theme.colors.tab_text || theme.colors.textcolor;
+        log(' => ', { actionIconColor }, theme.colors);
+        await Promise.all(Array.from(Object.entries(ORIGINAL_ICON_FOR_STATE), async ([state, url]) => {
+          const request = new XMLHttpRequest();
+          await new Promise((resolve, _reject) => {
+            request.open('GET', url, true);
+            request.addEventListener('load', resolve, { once: true });
+            request.overrideMimeType('text/plain');
+            request.send(null);
+          });
+          const actionIconSource = request.responseText.replace(/fill:[^;]+;/, `fill: ${actionIconColor};`);
+          ICON_FOR_STATE[state] = `data:image/svg+xml,${escape(actionIconSource)}#toolbar-dark`;
+        }));
+      }
+      else if (mDarkModeMatchMedia.matches) { // dark mode
+        for (const [state, url] of Object.entries(ORIGINAL_ICON_FOR_STATE)) {
+          ICON_FOR_STATE[state] = `${url}#toolbar-dark`;
+        }
+      }
+      else {
+        for (const [state, url] of Object.entries(ORIGINAL_ICON_FOR_STATE)) {
+          ICON_FOR_STATE[state] = `${url}#toolbar-bright`;
+        }
+      }
+    }; break;
+
+    case 'bright':
+      for (const [state, url] of Object.entries(ORIGINAL_ICON_FOR_STATE)) {
+        ICON_FOR_STATE[state] = `${url}#toolbar-bright`;
+      }
+      break;
+
+    case 'dark':
+      for (const [state, url] of Object.entries(ORIGINAL_ICON_FOR_STATE)) {
+        ICON_FOR_STATE[state] = `${url}#toolbar-dark`;
+      }
+      break;
+  }
+
+  log('updateIconForBrowserTheme: applying icons: ', ICON_FOR_STATE);
+
+  if (mMarkedMainWindowId == browser.windows.WINDOW_ID_NONE)
+    clearMarks();
+  else
+    await markWindowAsMain(mMarkedMainWindowId);
+}
+
+browser.theme.onUpdated.addListener(updateInfo => {
+  updateIconForBrowserTheme(updateInfo.theme);
+});
+
+mDarkModeMatchMedia.addListener(async _event => {
+  updateIconForBrowserTheme();
+});
+
 
 
 function updateAggregateTabsMatchedPattern() {

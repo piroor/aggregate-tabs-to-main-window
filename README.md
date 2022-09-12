@@ -9,7 +9,7 @@ Aggregates new tabs to a window which has most many tabs and largest size.
 
 This addon will help you to use multiple windows with specific usages parallelly like: window 1 is for Twitter, window 2 is for main browsing. In such case, new tabs opened from Twitter will be moved to the main window automatically.
 
-What is the "main browsing window"? This addon regards most largest window as that. If there are multiple largest windows, the tab which has most largest number of tabs is detected as the main.
+What is the "main browsing window"? This addon regards most largest window as that. If there are multiple largest windows, the tab which has most largest number of tabs is detected as the main. Moreover you can mark a specific window as the main window via the toolbar button.
 
 ## Useful example: parallel use of multiple sidebars, Tree Style Tab and Bookmarks
 

@@ -1,6 +1,9 @@
 # History
 
  - master/HEAD
+ - 1.6 (2022.9.12)
+   * Add ability to mark a specific window as "Main Window" permanently with the toolbar button.
+   * Separate option to control behavior for tabs maybe opened from external applications.
  - 1.5 (2022.3.28)
    * Aggregate new tabs more certainly. New tabs opened with URL were wrongly detected as blank tabs on recent versions of Firefox.
    * Don't aggregate background tabs loaded in a thin window (detected as a sidebar window).

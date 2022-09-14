@@ -1,6 +1,8 @@
 # History
 
  - master/HEAD
+ - 1.6.1 (2022.9.15)
+   * Apply theme color to the toolbar button icon correctly.
  - 1.6 (2022.9.12)
    * Add ability to mark a specific window as "Main Window" permanently with the toolbar button.
    * Separate option to control behavior for tabs maybe opened from external applications.

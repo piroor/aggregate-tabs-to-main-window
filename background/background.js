@@ -148,8 +148,8 @@ async function updateIconForBrowserTheme(theme) {
             request.overrideMimeType('text/plain');
             request.send(null);
           });
-          const actionIconSource = request.responseText.replace(/fill:[^;]+;/, `fill: ${actionIconColor};`);
-          ICON_FOR_STATE[state] = `data:image/svg+xml,${escape(actionIconSource)}#toolbar-dark`;
+          const actionIconSource = request.responseText.replace(/transparent\s*\/\*\s*TO BE REPLACED WITH THEME COLOR\s*\*\//g, actionIconColor);
+          ICON_FOR_STATE[state] = `data:image/svg+xml,${escape(actionIconSource)}#toolbar-theme`;
         }));
       }
       else if (mDarkModeMatchMedia.matches) { // dark mode

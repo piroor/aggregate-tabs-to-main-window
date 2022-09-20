@@ -136,9 +136,9 @@ async function updateIconForBrowserTheme(theme) {
         theme = await browser.theme.getCurrent(window.id);
       }
 
-      log('updateIconForBrowserTheme: colors: ', theme.colors);
+      log('updateIconForBrowserTheme: ', theme);
       if (theme.colors) {
-        const actionIconColor = theme.colors.icons || theme.colors.toolbar_text || theme.colors.tab_text || theme.colors.textcolor;
+        const actionIconColor = theme.colors.icons || theme.colors.toolbar_text || theme.colors.tab_text || theme.colors.tab_background_text || theme.colors.bookmark_text || theme.colors.textcolor;
         log(' => ', { actionIconColor }, theme.colors);
         await Promise.all(Array.from(Object.entries(ORIGINAL_ICON_FOR_STATE), async ([state, url]) => {
           const request = new XMLHttpRequest();

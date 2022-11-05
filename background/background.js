@@ -141,14 +141,9 @@ async function updateIconForBrowserTheme(theme) {
         const actionIconColor = theme.colors.icons || theme.colors.toolbar_text || theme.colors.tab_text || theme.colors.tab_background_text || theme.colors.bookmark_text || theme.colors.textcolor;
         log(' => ', { actionIconColor }, theme.colors);
         await Promise.all(Array.from(Object.entries(ORIGINAL_ICON_FOR_STATE), async ([state, url]) => {
-          const request = new XMLHttpRequest();
-          await new Promise((resolve, _reject) => {
-            request.open('GET', url, true);
-            request.addEventListener('load', resolve, { once: true });
-            request.overrideMimeType('text/plain');
-            request.send(null);
-          });
-          const actionIconSource = request.responseText.replace(/transparent\s*\/\*\s*TO BE REPLACED WITH THEME COLOR\s*\*\//g, actionIconColor);
+          const response = await fetch(url);
+          const body = await response.text();
+          const actionIconSource = body.replace(/transparent\s*\/\*\s*TO BE REPLACED WITH THEME COLOR\s*\*\//g, actionIconColor);
           ICON_FOR_STATE[state] = `data:image/svg+xml,${escape(actionIconSource)}#toolbar-theme`;
         }));
       }

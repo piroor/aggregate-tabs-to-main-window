@@ -38,6 +38,7 @@ configs = new Configs({
   doNotAggregateTabsFromMatchedPattern: '',
   doNotAggregateTabsMatched: false,
   doNotAggregateTabsMatchedPattern: '',
+  countPinnedTabsToDetectMainWindow: false,
   aggregateTabsForBookmarked: true,
   aggregateDuplicatedTabs: false,
   aggregateRestoredTabs: false,

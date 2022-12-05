@@ -636,6 +636,12 @@ function findMainWindowFrom(windows) {
     return marked;
   }
 
+  if (!configs.countPinnedTabsToDetectMainWindow) {
+    for (const window of windows) {
+      window.tabs = window.tabs.filter(tab => !tab.pinned);
+    }
+  }
+
   windows = windows.slice(0).sort((a, b) => {
     for (let name of configs.activeComparers) {
       const result = comparers[name](a, b);

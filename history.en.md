@@ -1,6 +1,8 @@
 # History
 
  - master/HEAD
+ - 1.6.3 (2022.12.6)
+   * Never treat windows which has many pinned tabs but less regular tabs as a main window by default. You can revert old behavior to set a hidden option `countPinnedTabsToDetectMainWindow` to `true`.
  - 1.6.2 (2022.9.21)
    * Apply theme color to the toolbar icon more certainly.
  - 1.6.1 (2022.9.15)

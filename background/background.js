@@ -43,9 +43,6 @@ configs.$addObserver(key => {
     case 'doNotAggregateTabsFromMatchedPattern':
       updateDoNotAggregateTabsFromMatchedPattern();
       break;
-    case 'iconColor':
-      updateIconForBrowserTheme();
-      break;
   }
 });
 
@@ -129,8 +126,6 @@ const mDarkModeMatchMedia = window.matchMedia('(prefers-color-scheme: dark)');
 
 async function updateIconForBrowserTheme(theme) {
   // generate icons with theme specific color
-  switch (configs.iconColor) {
-    case 'auto': {
       if (!theme) {
         const window = await browser.windows.getLastFocused();
         theme = await browser.theme.getCurrent(window.id);
@@ -147,30 +142,11 @@ async function updateIconForBrowserTheme(theme) {
           ICON_FOR_STATE[state] = `data:image/svg+xml,${escape(actionIconSource)}#toolbar-theme`;
         }));
       }
-      else if (mDarkModeMatchMedia.matches) { // dark mode
-        for (const [state, url] of Object.entries(ORIGINAL_ICON_FOR_STATE)) {
-          ICON_FOR_STATE[state] = `${url}#toolbar-dark`;
-        }
-      }
       else {
         for (const [state, url] of Object.entries(ORIGINAL_ICON_FOR_STATE)) {
-          ICON_FOR_STATE[state] = `${url}#toolbar-bright`;
+          ICON_FOR_STATE[state] = `${url}#toolbar`;
         }
       }
-    }; break;
-
-    case 'bright':
-      for (const [state, url] of Object.entries(ORIGINAL_ICON_FOR_STATE)) {
-        ICON_FOR_STATE[state] = `${url}#toolbar-bright`;
-      }
-      break;
-
-    case 'dark':
-      for (const [state, url] of Object.entries(ORIGINAL_ICON_FOR_STATE)) {
-        ICON_FOR_STATE[state] = `${url}#toolbar-dark`;
-      }
-      break;
-  }
 
   log('updateIconForBrowserTheme: applying icons: ', ICON_FOR_STATE);
 

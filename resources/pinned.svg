@@ -12,11 +12,15 @@
 	g.theme:target {
 		fill: transparent /* TO BE REPLACED WITH THEME COLOR */;
 	}
-	g.prefer-color-scheme:target {
-		fill: rgb(91, 91, 102); /* https://searchfox.org/mozilla-central/rev/d6576544301cacc0e393fbc919c53e4e6b0d46ec/browser/themes/shared/browser-custom-colors.css#74 */
+	g.prefer-color-scheme.default:target {
+		rgb(21, 20, 26); /* https://searchfox.org/mozilla-central/rev/d6576544301cacc0e393fbc919c53e4e6b0d46ec/toolkit/themes/shared/in-content/common-shared.css#16 */
+	}
+	g.prefer-color-scheme.toolbar:target {
+		rgb(91, 91, 102); /* https://searchfox.org/mozilla-central/rev/d6576544301cacc0e393fbc919c53e4e6b0d46ec/browser/themes/shared/browser-custom-colors.css#74 */
 	}
 	@media (prefers-color-scheme: dark) {
-		g.prefer-color-scheme:target {
+		g.prefer-color-scheme.default:target,
+		g.prefer-color-scheme.toolbar:target {
 			fill: rgb(251, 251, 254); /* https://searchfox.org/mozilla-central/rev/d6576544301cacc0e393fbc919c53e4e6b0d46ec/browser/themes/shared/browser-custom-colors.css#74 */
 		}
 	}
@@ -27,16 +31,16 @@
 <symbol id="icon">
 	<path d="M10.53 9.47L8.25 7.19 9.8 5.643a.694.694 0 0 0 0-.98 3.04 3.04 0 0 0-2.161-.894h-.122A1.673 1.673 0 0 1 5.846 2.1v-.408A.693.693 0 0 0 4.664 1.2L1.2 4.664a.693.693 0 0 0 .49 1.182h.41a1.672 1.672 0 0 1 1.669 1.671v.117a2.8 2.8 0 0 0 .925 2.192.693.693 0 0 0 .949-.026L7.19 8.251l2.28 2.28a.75.75 0 0 0 1.06-1.061z"></path>
 </symbol>
-<g id="toolbar-theme" class="theme">
+<g id="toolbar-theme" class="theme toolbar">
 	<use href="#icon"/>
 </g>
-<g id="default-theme" class="theme">
+<g id="default-theme" class="theme default">
 	<use href="#icon"/>
 </g>
-<g id="toolbar" class="prefer-color-scheme">
+<g id="toolbar" class="prefer-color-scheme toolbar">
 	<use href="#icon"/>
 </g>
-<g id="default" class="prefer-color-scheme">
+<g id="default" class="prefer-color-scheme default">
 	<use href="#icon"/>
 </g>
 </svg>

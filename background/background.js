@@ -68,6 +68,11 @@ function saveLastCreatedAt() {
     lastCreatedAt: gLsatCreatedAt,
   });
 }
+function saveMarkedMainWindowId() {
+  browser.storage.session.set({
+    markedMainWindowId: mMarkedMainWindowId,
+  });
+}
 
 configs.$addObserver(key => {
   switch (key) {
@@ -90,8 +95,8 @@ Promise.all([
   browser.windows.getAll({ windowTypes: ['normal'] }),
   browser.storage.session.get(null),
 ]).then(async ([windows, values]) => {
-  const { openingTabs, creatingTabs, trackedWindows, initialTabIdsInWindow, anyWindowHasFocus, createdAt, lastActive, lastCreatedAt } = values || {};
-  console.log('resumed with values: ', { openingTabs, creatingTabs, trackedWindows, initialTabIdsInWindow, anyWindowHasFocus, createdAt, lastActive, lastCreatedAt });
+  const { openingTabs, creatingTabs, trackedWindows, initialTabIdsInWindow, anyWindowHasFocus, createdAt, lastActive, lastCreatedAt, markedMainWindowId } = values || {};
+  console.log('resumed with values: ', { openingTabs, creatingTabs, trackedWindows, initialTabIdsInWindow, anyWindowHasFocus, createdAt, lastActive, lastCreatedAt, markedMainWindowId });
   if (openingTabs !== undefined)
     gOpeningTabs = openingTabs;
   if (creatingTabs !== undefined)
@@ -108,6 +113,14 @@ Promise.all([
     gLastActive = new Map(lastActive);
   if (lastCreatedAt !== undefined)
     gLsatCreatedAt = lastCreatedAt;
+  if (markedMainWindowId !== undefined)
+    mMarkedMainWindowId = markedMainWindowId;
+
+  // resumed case: skip initialization process
+  if (mMarkedMainWindowId != browser.windows.WINDOW_ID_NONE) {
+    await updateIconForBrowserTheme();
+    return;
+  }
 
   const now = Date.now();
   let mainWindow = null;
@@ -134,6 +147,7 @@ const ICON_FOR_STATE = JSON.parse(JSON.stringify(ORIGINAL_ICON_FOR_STATE));
 
 async function markWindowAsMain(windowId) {
   mMarkedMainWindowId = windowId;
+  saveMarkedMainWindowId();
 
   const windows = await browser.windows.getAll();
   await Promise.all(windows.map(async window => {
@@ -156,6 +170,7 @@ async function markWindowAsMain(windowId) {
 
 async function clearMarks() {
   mMarkedMainWindowId = browser.windows.WINDOW_ID_NONE;
+  saveMarkedMainWindowId();
 
   const windows = await browser.windows.getAll();
   await Promise.all(windows.map(window => clearMark(window.id)));

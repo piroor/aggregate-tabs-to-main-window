@@ -11,10 +11,10 @@ const kMARKED_AS_MAIN_WINDOW = 'marked-as-main-window';
 const kMARKED                = 'true';
 let mMarkedMainWindowId = browser.windows.WINDOW_ID_NONE;
 
-const gOpeningTabs = [];
-const gCreatingTabs = new Set();
-const gTrackedWindows = new Set();
-const gInitialTabIdsInWindow = new Map();
+let gOpeningTabs = [];
+let gCreatingTabs = new Set();
+let gTrackedWindows = new Set();
+let gInitialTabIdsInWindow = new Map();
 
 let gAggregateTabsMatchedPattern = null;
 let gAggregateTabsFromMatchedPattern = null;
@@ -22,12 +22,52 @@ let gDoNotAggregateTabsMatchedPattern = null;
 let gDoNotAggregateTabsFromMatchedPattern = null;
 let gAnyWindowHasFocus = true;
 
+let gCreatedAt = new Map();
+let gLastActive = new Map();
+let gLsatCreatedAt = 0;
+
 configs.$loaded.then(() => {
   updateAggregateTabsMatchedPattern();
   updateAggregateTabsFromMatchedPattern();
   updateDoNotAggregateTabsMatchedPattern();
   updateDoNotAggregateTabsFromMatchedPattern();
 });
+
+function saveOpeningTabs() {
+  browser.storage.session.set({
+    openingTabs: gOpeningTabs,
+  });
+}
+function saveTrackedWindows() {
+  browser.storage.session.set({
+    trackedWindows: [...gTrackedWindows],
+  });
+}
+function saveInitialTabIdsInWindow() {
+  browser.storage.session.set({
+    initialTabIdsInWindow: [...gInitialTabIdsInWindow.entries()].map(([key, value]) => [key, value && [...value]]),
+  });
+}
+function saveAnyWindowHasFocus() {
+  browser.storage.session.set({
+    anyWindowHasFocus: gAnyWindowHasFocus,
+  });
+}
+function saveCreatedAt() {
+  browser.storage.session.set({
+    createdAt: [...gCreatedAt.entries()],
+  });
+}
+function saveLastActive() {
+  browser.storage.session.set({
+    lastActive: [...gLastActive.entries()],
+  });
+}
+function saveLastCreatedAt() {
+  browser.storage.session.set({
+    lastCreatedAt: gLsatCreatedAt,
+  });
+}
 
 configs.$addObserver(key => {
   switch (key) {
@@ -46,9 +86,29 @@ configs.$addObserver(key => {
   }
 });
 
-browser.windows.getAll({
-  windowTypes: ['normal']
-}).then(async windows => {
+Promise.all([
+  browser.windows.getAll({ windowTypes: ['normal'] }),
+  browser.storage.session.get(null),
+]).then(async ([windows, values]) => {
+  const { openingTabs, creatingTabs, trackedWindows, initialTabIdsInWindow, anyWindowHasFocus, createdAt, lastActive, lastCreatedAt } = values || {};
+  console.log('resumed with values: ', { openingTabs, creatingTabs, trackedWindows, initialTabIdsInWindow, anyWindowHasFocus, createdAt, lastActive, lastCreatedAt });
+  if (openingTabs !== undefined)
+    gOpeningTabs = openingTabs;
+  if (creatingTabs !== undefined)
+    gCreatingTabs = new Set(creatingTabs);
+  if (trackedWindows !== undefined)
+    gTrackedWindows = new Set(trackedWindows);
+  if (initialTabIdsInWindow !== undefined)
+    gInitialTabIdsInWindow = new Map(initialTabIdsInWindow.map(([key, value]) => [key, new Set(value)]));
+  if (anyWindowHasFocus !== undefined)
+    gAnyWindowHasFocus = anyWindowHasFocus;
+  if (createdAt !== undefined)
+    gCreatedAt = new Map(createdAt);
+  if (lastActive !== undefined)
+    gLastActive = new Map(lastActive);
+  if (lastCreatedAt !== undefined)
+    gLsatCreatedAt = lastCreatedAt;
+
   const now = Date.now();
   let mainWindow = null;
   await Promise.all(windows.map(async window => {
@@ -58,6 +118,8 @@ browser.windows.getAll({
     if (state == kMARKED)
       mainWindow = window;
   }));
+  saveTrackedWindows();
+  saveCreatedAt();
   await updateIconForBrowserTheme();
   if (mainWindow)
     await markWindowAsMain(mainWindow.id);
@@ -78,11 +140,11 @@ async function markWindowAsMain(windowId) {
     if (window.id == mMarkedMainWindowId)
       return Promise.all([
         browser.sessions.setWindowValue(window.id, kMARKED_AS_MAIN_WINDOW, kMARKED),
-        browser.browserAction.setTitle({
+        browser.action.setTitle({
           windowId: window.id,
           title:    browser.i18n.getMessage('browserAction_active'),
         }),
-        browser.browserAction.setIcon({
+        browser.action.setIcon({
           windowId: window.id,
           path:     { 16: ICON_FOR_STATE.marked },
         }),
@@ -102,11 +164,11 @@ async function clearMarks() {
 async function clearMark(windowId) {
   return Promise.all([
     browser.sessions.removeWindowValue(windowId, kMARKED_AS_MAIN_WINDOW),
-    browser.browserAction.setTitle({
+    browser.action.setTitle({
       windowId: windowId,
       title:    browser.i18n.getMessage('browserAction_inactive'),
     }),
-    browser.browserAction.setIcon({
+    browser.action.setIcon({
       windowId: windowId,
       path:     { 16: ICON_FOR_STATE.default },
     }),
@@ -119,7 +181,7 @@ function onToolbarButtonClick(tab) {
   else
     markWindowAsMain(tab.windowId);
 }
-browser.browserAction.onClicked.addListener(onToolbarButtonClick);
+browser.action.onClicked.addListener(onToolbarButtonClick);
 
 
 const mDarkModeMatchMedia = window.matchMedia('(prefers-color-scheme: dark)');
@@ -282,9 +344,11 @@ browser.tabs.onCreated.addListener(async newTab => {
     const initialTabIds = gInitialTabIdsInWindow.get(newTab.windowId) || new Set();
     initialTabIds.add(newTab.id);
     gInitialTabIdsInWindow.set(newTab.windowId, initialTabIds);
+    saveInitialTabIdsInWindow();
   }
 
   gTrackedWindows.add(newTab.windowId);
+  saveTrackedWindows();
   gCreatingTabs.add(newTab.id);
   let retryCount = 0;
   setTimeout(async function delayedOnCreated() {
@@ -315,9 +379,11 @@ browser.tabs.onCreated.addListener(async newTab => {
     log(`tab ${newTab.id}: do nothing because multiple tabs are restored in an existing window`);
     await wait(100);
     gOpeningTabs.splice(gOpeningTabs.indexOf(newTab.id), 1);
+    saveOpeningTabs();
     return;
   }
   gOpeningTabs.splice(gOpeningTabs.indexOf(newTab.id), 1);
+  saveOpeningTabs();
 
   if (isNewWindow) {
     log('ignore initial tab of a new window');
@@ -345,6 +411,7 @@ browser.tabs.onCreated.addListener(async newTab => {
 browser.tabs.onRemoved.addListener((tabId, removeInfo) => {
   const initialTabIds = gInitialTabIdsInWindow.get(removeInfo.windowId) || new Set();
   initialTabIds.delete(tabId);
+  saveInitialTabIdsInWindow();
 });
 
 browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
@@ -407,15 +474,14 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   });
 });
 
-const gCreatedAt = new Map();
-const gLastActive = new Map();
-let gLsatCreatedAt = 0;
-
 browser.windows.onCreated.addListener(window => {
   const now = Date.now();
   gCreatedAt.set(window.id, now);
+  saveCreatedAt();
   gLastActive.set(window.id, now);
+  saveLastActive();
   gLsatCreatedAt = now;
+  saveLastCreatedAt();
 
   browser.sessions.getWindowValue(window.id, kMARKED_AS_MAIN_WINDOW)
     .then(value => {
@@ -427,16 +493,22 @@ browser.windows.onCreated.addListener(window => {
 browser.windows.onFocusChanged.addListener(windowId => {
   log(`windows.onFocusChanged: ${windowId}`);
   gAnyWindowHasFocus = windowId != browser.windows.WINDOW_ID_NONE;
+  saveAnyWindowHasFocus();
   if (!gAnyWindowHasFocus)
     return;
   gLastActive.set(windowId, Date.now());
+  saveLastActive();
 });
 
 browser.windows.onRemoved.addListener(windowId => {
   gCreatedAt.delete(windowId);
+  saveCreatedAt();
   gLastActive.delete(windowId);
+  saveLastActive();
   gTrackedWindows.delete(windowId);
+  saveTrackedWindows();
   gInitialTabIdsInWindow.delete(windowId);
+  saveInitialTabIdsInWindow();
 });
 
 async function tryAggregateTab(tab, { bookmarked, mayFromExternalApp, ...options } = {}) {

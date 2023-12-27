@@ -10,3 +10,6 @@
 [submodule "submodules/webextensions-lib-options"]
 	path = submodules/webextensions-lib-options
 	url = https://github.com/piroor/webextensions-lib-options.git
+[submodule "submodules/webextensions-lib-session-values"]
+	path = submodules/webextensions-lib-session-values
+	url = https://github.com/piroor/webextensions-lib-session-values.git

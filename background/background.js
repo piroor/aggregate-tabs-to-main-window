@@ -21,7 +21,7 @@ gValues.defineItem('initialTabIdsInWindow', new Map(),
 gValues.defineItem('anyWindowHasFocus', true);
 gValues.defineItem('createdAt', new Map());
 gValues.defineItem('lastActive', new Map());
-gValues.defineItem('lsatCreatedAt', 0);
+gValues.defineItem('lastCreatedAt', 0);
 
 let gAggregateTabsMatchedPattern = null;
 let gAggregateTabsFromMatchedPattern = null;
@@ -330,7 +330,7 @@ browser.tabs.onCreated.addListener(async newTab => {
   gValues.openingTabs.push(newTab.id);
   await wait(configs.delayForMultipleNewTabs);
   if (gValues.openingTabs.length > 1 &&
-      Date.now() - gValues.lsatCreatedAt < configs.delayForNewWindow) {
+      Date.now() - gValues.lastCreatedAt < configs.delayForNewWindow) {
     log(`tab ${newTab.id}: do nothing because multiple tabs are restored in an existing window`);
     await wait(100);
     gValues.openingTabs.splice(gValues.openingTabs.indexOf(newTab.id), 1);
@@ -435,7 +435,7 @@ browser.windows.onCreated.addListener(window => {
   const now = Date.now();
   gValues.createdAt.set(window.id, now);
   gValues.lastActive.set(window.id, now);
-  gValues.lsatCreatedAt = now;
+  gValues.lastCreatedAt = now;
   gValues.save('createdAt', 'lastActive', 'lastCreatedAt');
 
   browser.sessions.getWindowValue(window.id, kMARKED_AS_MAIN_WINDOW)

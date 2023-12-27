@@ -1,5 +1,5 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "__MSG_extensionName__",
   "version": "1.6.3",
   "author": "YUKI \"Piro\" Hiroshi",
@@ -16,7 +16,8 @@
       "extlib/Configs.js",
       "common/common.js",
       "background/background.js"
-    ]
+    ],
+    "persistent": false
   },
   "browser_action": {
     "default_title": "__MSG_browserAction_inactive__",
@@ -29,7 +30,7 @@
     "browser_style": true
   },
   "default_locale": "en",
-  "applications": {
+  "browser_specific_settings": {
     "gecko": {
       "id": "aggregate-tabs-to-main-window@piro.sakura.ne.jp",
       "strict_min_version": "68.0"

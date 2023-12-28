@@ -74,7 +74,7 @@ Promise.all([
     if (state == kMARKED)
       mainWindow = window;
   }));
-  gValues.save('trackedWindows', 'createdAt');
+  gValues.save();
   await updateIconForBrowserTheme();
   if (mainWindow)
     await markWindowAsMain(mainWindow.id);
@@ -307,12 +307,10 @@ browser.tabs.onCreated.addListener(async newTab => {
     const initialTabIds = gValues.initialTabIdsInWindow.get(newTab.windowId) || new Set();
     initialTabIds.add(newTab.id);
     gValues.initialTabIdsInWindow.set(newTab.windowId, initialTabIds);
-    gValues.save('initialTabIdsInWindow');
   }
 
   gValues.trackedWindows.add(newTab.windowId);
   gValues.creatingTabs.add(newTab.id);
-  gValues.save('trackedWindows', 'creatingTabs');
   let retryCount = 0;
   setTimeout(async function delayedOnCreated() {
     const tab = await browser.tabs.get(newTab.id);
@@ -328,7 +326,7 @@ browser.tabs.onCreated.addListener(async newTab => {
       return;
     }
     gValues.creatingTabs.delete(newTab.id);
-    gValues.save('creatingTabs');
+    gValues.save();
     log('delayed onCreated: tab: ', tab);
     tryAggregateTab(tab, {
       excludeLastTab: true,
@@ -343,11 +341,11 @@ browser.tabs.onCreated.addListener(async newTab => {
     log(`tab ${newTab.id}: do nothing because multiple tabs are restored in an existing window`);
     await wait(100);
     gValues.openingTabs.splice(gValues.openingTabs.indexOf(newTab.id), 1);
-    gValues.save('openingTabs');
+    gValues.save();
     return;
   }
   gValues.openingTabs.splice(gValues.openingTabs.indexOf(newTab.id), 1);
-  gValues.save('openingTabs');
+  gValues.save();
 
   if (isNewWindow) {
     log('ignore initial tab of a new window');
@@ -377,7 +375,7 @@ browser.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
   const initialTabIds = gValues.initialTabIdsInWindow.get(removeInfo.windowId) || new Set();
   initialTabIds.delete(tabId);
   gValues.initialTabIdsInWindow.set(removeInfo.windowId, initialTabIds);
-  gValues.save('initialTabIdsInWindow');
+  gValues.save();
 });
 
 browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
@@ -398,7 +396,7 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
       return;
     log('delayed onCreated (onUpdated): tab: ', tab);
     gValues.creatingTabs.delete(tabId);
-    gValues.save('creatingTabs');
+    gValues.save();
     tryAggregateTab(tab, {
       excludeLastTab: true,
     });
@@ -407,7 +405,7 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 
   initialTabIds.delete(tabId);
   gValues.initialTabIdsInWindow.set(tab.windowId, initialTabIds);
-  gValues.save('initialTabIdsInWindow')
+  gValues.save()
 
   if (!configs.redirectLoadingInCurrentTab)
     return;
@@ -450,7 +448,7 @@ browser.windows.onCreated.addListener(async window => {
   gValues.createdAt.set(window.id, now);
   gValues.lastActive.set(window.id, now);
   gValues.lastCreatedAt = now;
-  gValues.save('createdAt', 'lastActive', 'lastCreatedAt');
+  gValues.save();
 
   browser.sessions.getWindowValue(window.id, kMARKED_AS_MAIN_WINDOW)
     .then(value => {
@@ -466,7 +464,7 @@ browser.windows.onFocusChanged.addListener(async windowId => {
   if (!gValues.anyWindowHasFocus)
     return;
   gValues.lastActive.set(windowId, Date.now());
-  gValues.save('lastActive');
+  gValues.save();
 });
 
 browser.windows.onRemoved.addListener(async windowId => {
@@ -475,7 +473,7 @@ browser.windows.onRemoved.addListener(async windowId => {
   gValues.lastActive.delete(windowId);
   gValues.trackedWindows.delete(windowId);
   gValues.initialTabIdsInWindow.delete(windowId);
-  gValues.save('createdAt', 'lastActive', 'trackedWindows', 'initialTabIdsInWindow');
+  gValues.save();
 });
 
 async function tryAggregateTab(tab, { bookmarked, mayFromExternalApp, ...options } = {}) {

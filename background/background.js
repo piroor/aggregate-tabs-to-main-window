@@ -129,7 +129,8 @@ async function clearMark(windowId) {
   ]);
 }
 
-function onToolbarButtonClick(tab) {
+async function onToolbarButtonClick(tab) {
+  await gValues.$loaded;
   if (gValues.markedMainWindowId == tab.windowId)
     clearMarks();
   else
@@ -143,8 +144,14 @@ const mDarkModeMatchMedia = window.matchMedia('(prefers-color-scheme: dark)');
 async function updateIconForBrowserTheme(theme) {
   // generate icons with theme specific color
   if (!theme) {
-    const window = await browser.windows.getLastFocused();
+    const [window] = await Promise.all([
+      browser.windows.getLastFocused(),
+      gValues.$loaded,
+    ]);
     theme = await browser.theme.getCurrent(window.id);
+  }
+  else {
+    await gValues.$loaded;
   }
 
   log('updateIconForBrowserTheme: ', theme);
@@ -286,6 +293,7 @@ async function getUniqueTabId(tabId) {
 
 
 browser.tabs.onCreated.addListener(async newTab => {
+  await gValues.$loaded;
   const isNewWindow = !gValues.trackedWindows.has(newTab.windowId);
   const now = Date.now();
   const deltaFromWindowCreated = now - (gValues.createdAt.get(newTab.windowId) || now);
@@ -363,7 +371,8 @@ browser.tabs.onCreated.addListener(async newTab => {
   });
 });
 
-browser.tabs.onRemoved.addListener((tabId, removeInfo) => {
+browser.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
+  await gValues.$loaded;
   const initialTabIds = gValues.initialTabIdsInWindow.get(removeInfo.windowId) || new Set();
   initialTabIds.delete(tabId);
   gValues.save('initialTabIdsInWindow');
@@ -373,6 +382,7 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (!changeInfo.url)
     return;
 
+  await gValues.$loaded;
   const initialTabIds = gValues.initialTabIdsInWindow.get(tab.windowId) || new Set();
 
   if (gValues.creatingTabs.has(tabId)) {
@@ -431,8 +441,9 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   });
 });
 
-browser.windows.onCreated.addListener(window => {
+browser.windows.onCreated.addListener(async window => {
   const now = Date.now();
+  await gValues.$loaded;
   gValues.createdAt.set(window.id, now);
   gValues.lastActive.set(window.id, now);
   gValues.lastCreatedAt = now;
@@ -445,8 +456,9 @@ browser.windows.onCreated.addListener(window => {
     });
 });
 
-browser.windows.onFocusChanged.addListener(windowId => {
+browser.windows.onFocusChanged.addListener(async windowId => {
   log(`windows.onFocusChanged: ${windowId}`);
+  await gValues.$loaded;
   gValues.anyWindowHasFocus = windowId != browser.windows.WINDOW_ID_NONE;
   if (!gValues.anyWindowHasFocus)
     return;
@@ -454,7 +466,8 @@ browser.windows.onFocusChanged.addListener(windowId => {
   gValues.save('lastActive');
 });
 
-browser.windows.onRemoved.addListener(windowId => {
+browser.windows.onRemoved.addListener(async windowId => {
+  await gValues.$loaded;
   gValues.createdAt.delete(windowId);
   gValues.lastActive.delete(windowId);
   gValues.trackedWindows.delete(windowId);

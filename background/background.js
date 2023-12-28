@@ -376,6 +376,7 @@ browser.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
   await gValues.$loaded;
   const initialTabIds = gValues.initialTabIdsInWindow.get(removeInfo.windowId) || new Set();
   initialTabIds.delete(tabId);
+  gValues.initialTabIdsInWindow.set(removeInfo.windowId, initialTabIds);
   gValues.save('initialTabIdsInWindow');
 });
 
@@ -405,6 +406,7 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   }
 
   initialTabIds.delete(tabId);
+  gValues.initialTabIdsInWindow.set(tab.windowId, initialTabIds);
   gValues.save('initialTabIdsInWindow')
 
   if (!configs.redirectLoadingInCurrentTab)

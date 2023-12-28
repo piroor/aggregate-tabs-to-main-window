@@ -59,10 +59,8 @@ Promise.all([
   browser.windows.getAll({ windowTypes: ['normal'] }),
   gValues.$loaded,
 ]).then(async ([windows, loadedKeys]) => {
-  console.log('resumed with values: ', loadedKeys);
-
-  // resumed case: skip initialization process
-  if (gValues.markedMainWindowId != browser.windows.WINDOW_ID_NONE) {
+  if (loadedKeys.size > 0) {
+    log('resumed: skip initialization process');
     await updateIconForBrowserTheme();
     return;
   }

@@ -10,18 +10,21 @@ gLogContext = 'BG';
 const kMARKED_AS_MAIN_WINDOW = 'marked-as-main-window';
 const kMARKED                = 'true';
 
-const gValues = new SessionValues();
-gValues.defineItem('markedMainWindowId', browser.windows.WINDOW_ID_NONE);
-gValues.defineItem('openingTabs', []);
-gValues.defineItem('creatingTabs', new Set());
-gValues.defineItem('trackedWindows', new Set());
-gValues.defineItem('initialTabIdsInWindow', new Map(),
-                   value => [...value.entries()].map(([key, value]) => [key, value && [...value]]),
-                   value => new Map(value.map(([key, value]) => [key, new Set(value)])));
-gValues.defineItem('anyWindowHasFocus', true);
-gValues.defineItem('createdAt', new Map());
-gValues.defineItem('lastActive', new Map());
-gValues.defineItem('lastCreatedAt', 0);
+const gValues = new SessionValues({
+  markedMainWindowId: browser.windows.WINDOW_ID_NONE,
+  openingTabs: [],
+  creatingTabs: new Set(),
+  trackedWindows: new Set(),
+  initialTabIdsInWindow: new SessionValue(
+    new Map(),
+    value => [...value.entries()].map(([key, value]) => [key, value && [...value]]),
+    value => new Map(value.map(([key, value]) => [key, new Set(value)]))
+  ),
+  anyWindowHasFocus: true,
+  createdAt: new Map(),
+  lastActive: new Map(),
+  lastCreatedAt: 0,
+});
 
 let gAggregateTabsMatchedPattern = null;
 let gAggregateTabsFromMatchedPattern = null;
@@ -54,7 +57,7 @@ configs.$addObserver(key => {
 
 Promise.all([
   browser.windows.getAll({ windowTypes: ['normal'] }),
-  gValues.loadAll(),
+  gValues.$loaded,
 ]).then(async ([windows, loadedKeys]) => {
   console.log('resumed with values: ', loadedKeys);
 

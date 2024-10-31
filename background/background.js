@@ -625,6 +625,20 @@ async function getRedirectTargetWindowForTab(tab, options = {}) {
     return null;
   }
 
+  for (const win of windows) {
+    for (const tab of win.tabs) {
+      if (win.lastAccessed &&
+          win.lastAccessed > tab.lastAccessed)
+        continue;
+      win.lastAccessed = tab.lastAccessed;
+    }
+  }
+  windows.sort((a, b) => b.lastAccessed - a.lastAccessed);
+  // Treat the source window as the most recent window always.
+  windows.splice(windows.indexOf(sourceWindow), 1);
+  windows.unshift(sourceWindow);
+  log('windows sorted by last access timestamp: ', windows);
+
   const mainWindow = findMainWindowFrom(windows);
   log('mainWindow: ', mainWindow.id);
   if (tab.windowId == mainWindow.id) {

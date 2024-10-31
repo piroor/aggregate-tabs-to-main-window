@@ -639,6 +639,11 @@ async function getRedirectTargetWindowForTab(tab, options = {}) {
   windows.unshift(sourceWindow);
   log('windows sorted by last access timestamp: ', windows);
 
+  if (configs.suppressAggregationForManyTabsWindow &&
+      sourceWindow.tabs.length >= configs.suppressAggregationForManyTabsWindowThreshold) {
+    return sourceWindow;
+  }
+
   const mainWindow = findMainWindowFrom(windows);
   log('mainWindow: ', mainWindow.id);
   if (tab.windowId == mainWindow.id) {

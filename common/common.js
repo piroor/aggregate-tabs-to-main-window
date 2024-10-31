@@ -28,6 +28,15 @@ function wait(delay) {
 configs = new Configs({
   iconColor: 'auto',
   activeComparers: ['wider', 'taller', 'muchTabs', 'recent'],
+
+  suppressAggregationForManyTabsWindow: true,
+  suppressAggregationForManyTabsWindowThreshold: 3,
+  /*
+  suppressAggregationForLargeWindow: true,
+  suppressAggregationForLargeWindowScreenWidthPercentageThreshold: 50,
+  suppressAggregationForLargeWindowScreenHeightPercentageThreshold: 50,
+  */
+
   aggregateTabsFromPinned: true,
   aggregateTabsFromUnpinned: true,
   aggregateTabsFromMatched: false,

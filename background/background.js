@@ -552,7 +552,7 @@ async function shouldAggregateTab(tab, { bookmarked, fromExternalApp } = {}) {
       fromExternalApp) {
     log('tab from external app, should aggregate');
     shouldBeAggregated = true;
-  }
+  } // otherwise, aggregation of tabs from the browser itself can be suppressed.
   else if (configs.suppressAggregationForManyTabsWindow &&
            sourceWindow.tabs.length >= configs.suppressAggregationForManyTabsWindowThreshold) {
     shouldBeAggregated = false;

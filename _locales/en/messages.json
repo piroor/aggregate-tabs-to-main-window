@@ -24,6 +24,13 @@
   "config_aggregateTabsFromExternalApp_caption": { "message": "Maybe opened from External Applications" },
   "config_aggregateTabsAll_caption":           { "message": "Any other case" },
 
+  "config_suppressAggregation_caption": { "message": "Suppression of aggregation for tabs opened not from External Applications" },
+  "config_suppressAggregationForManyTabsWindowThreshold_before": { "message": "When a tab is opened in a widnow having " },
+  "config_suppressAggregationForManyTabsWindowThreshold_after": { "message": " or more tabs" },
+  "config_suppressAggregationForLargeWindowScreenWidthPercentageThreshold_before": { "message": "When a tab is opened in a large window over " },
+  "config_suppressAggregationForLargeWindowScreenWidthPercentageThreshold_after": { "message": "% width and " },
+  "config_suppressAggregationForLargeWindowScreenHeightPercentageThreshold_after": { "message": "% height of the screen (*Note: the screen detection may fail if you use multiple screens with different zoom levels)" },
+
   "config_debug_caption": { "message": "Development" },
   "config_debug_label": { "message": "Debug mode" },
   "config_all_caption": { "message": "All Configs" }

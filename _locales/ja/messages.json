@@ -24,6 +24,13 @@
   "config_aggregateTabsFromExternalApp_caption": { "message": "他のアプリケーションから開かれたであろうタブ" },
   "config_aggregateTabsAll_caption":           { "message": "その他の場合すべて" },
 
+  "config_suppressAggregation_caption": { "message": "他のアプリケーションから開かれたタブ以外で、以下に該当する場合は集約しない" },
+  "config_suppressAggregationForManyTabsWindowThreshold_before": { "message": "すでに" },
+  "config_suppressAggregationForManyTabsWindowThreshold_after": { "message": "個以上のタブがあるウィンドウ内でタブが開かれた場合" },
+  "config_suppressAggregationForLargeWindowScreenWidthPercentageThreshold_before": { "message": "画面の幅の" },
+  "config_suppressAggregationForLargeWindowScreenWidthPercentageThreshold_after": { "message": "パーセント以上かつ画面の高さの" },
+  "config_suppressAggregationForLargeWindowScreenHeightPercentageThreshold_after": { "message": "パーセントよりも大きいウィンドウ内でタブが開かれた場合（※注意：拡大率が異なる画面を組み合わせて使用している場合は判定が不正確になります）" },
+
   "config_debug_caption": { "message": "開発用" },
   "config_debug_label": { "message": "デバッグモード" },
   "config_all_caption": { "message": "すべての設定" }

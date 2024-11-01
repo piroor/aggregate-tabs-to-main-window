@@ -499,8 +499,17 @@ async function tryAggregateTab(tab, { bookmarked, mayFromExternalApp, ...options
 }
 
 async function shouldAggregateTab(tab, { bookmarked, fromExternalApp } = {}) {
-  const opener = tab.openerTabId && await browser.tabs.get(tab.openerTabId);
+  const [opener, sourceWindow] = await Promise.all([
+    tab.openerTabId && await browser.tabs.get(tab.openerTabId),
+    browser.windows.get(tab.windowId, { populate: true }),
+  ]);
   let shouldBeAggregated = null;
+
+  if (configs.suppressAggregationForManyTabsWindow &&
+      sourceWindow.tabs.length >= configs.suppressAggregationForManyTabsWindowThreshold) {
+    return false;
+  }
+
   if (opener) {
     log('shouldAggregateTab: has opener');
     if (opener.pinned) {
@@ -638,11 +647,6 @@ async function getRedirectTargetWindowForTab(tab, options = {}) {
   windows.splice(windows.indexOf(sourceWindow), 1);
   windows.unshift(sourceWindow);
   log('windows sorted by last access timestamp: ', windows);
-
-  if (configs.suppressAggregationForManyTabsWindow &&
-      sourceWindow.tabs.length >= configs.suppressAggregationForManyTabsWindowThreshold) {
-    return sourceWindow;
-  }
 
   const mainWindow = findMainWindowFrom(windows);
   log('mainWindow: ', mainWindow.id);

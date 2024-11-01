@@ -1,6 +1,9 @@
 # History
 
  - master/HEAD
+ - 1.7.0 (2024.11.1)
+   * Add a new context menu command to deactivate tab aggregation temporarily, on the toolbar button.
+   * Add new options to deactivate tab aggregation for certain cases: tabs opened in a window having multiple tabs or in a large window.
  - 1.6.3 (2022.12.6)
    * Never treat windows which has many pinned tabs but less regular tabs as a main window by default. You can revert old behavior to set a hidden option `countPinnedTabsToDetectMainWindow` to `true`.
  - 1.6.2 (2022.9.21)

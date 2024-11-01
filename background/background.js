@@ -505,11 +505,6 @@ async function shouldAggregateTab(tab, { bookmarked, fromExternalApp } = {}) {
   ]);
   let shouldBeAggregated = null;
 
-  if (configs.suppressAggregationForManyTabsWindow &&
-      sourceWindow.tabs.length >= configs.suppressAggregationForManyTabsWindowThreshold) {
-    return false;
-  }
-
   if (opener) {
     log('shouldAggregateTab: has opener');
     if (opener.pinned) {
@@ -557,6 +552,10 @@ async function shouldAggregateTab(tab, { bookmarked, fromExternalApp } = {}) {
       fromExternalApp) {
     log('tab from external app, should aggregate');
     shouldBeAggregated = true;
+  }
+  else if (configs.suppressAggregationForManyTabsWindow &&
+           sourceWindow.tabs.length >= configs.suppressAggregationForManyTabsWindowThreshold) {
+    shouldBeAggregated = false;
   }
 
   if (shouldBeAggregated &&

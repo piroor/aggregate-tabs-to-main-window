@@ -26,7 +26,7 @@
   "config_aggregateTabsAll_caption":           { "message": "Any other case" },
 
   "config_suppressAggregation_caption": { "message": "Suppression of aggregation for tabs opened not from External Applications" },
-  "config_suppressAggregationForManyTabsWindowThreshold_before": { "message": "When a tab is opened in a widnow having " },
+  "config_suppressAggregationForManyTabsWindowThreshold_before": { "message": "When a tab is opened in a window having " },
   "config_suppressAggregationForManyTabsWindowThreshold_after": { "message": " or more tabs" },
   "config_suppressAggregationForLargeWindowScreenWidthPercentageThreshold_before": { "message": "When a tab is opened in a large window over " },
   "config_suppressAggregationForLargeWindowScreenWidthPercentageThreshold_after": { "message": "% width and " },

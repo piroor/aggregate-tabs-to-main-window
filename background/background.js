@@ -548,11 +548,14 @@ async function shouldAggregateTab(tab, { bookmarked, fromExternalApp } = {}) {
     log('bookmarked url, should aggregate = ', { shouldBeAggregated, url: tab.url });
   }
 
+  // Tabs from external apps should be controlled even if suppression options are configured.
   if (configs.aggregateTabsFromExternalApp &&
       fromExternalApp) {
     log('tab from external app, should aggregate');
     shouldBeAggregated = true;
-  } // otherwise, aggregation of tabs from the browser itself can be suppressed.
+  }
+  // On the other hand, tabs from internal are generally opened with operations on any browser window intentionally.
+  // Auto-aggregation for such intentional cases need to be suppressed by options.
   else if (configs.suppressAggregationForManyTabsWindow &&
            sourceWindow.tabs.length >= configs.suppressAggregationForManyTabsWindowThreshold) {
     shouldBeAggregated = false;

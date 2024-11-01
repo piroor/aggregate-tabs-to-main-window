@@ -31,11 +31,9 @@ configs = new Configs({
 
   suppressAggregationForManyTabsWindow: true,
   suppressAggregationForManyTabsWindowThreshold: 3,
-  /*
   suppressAggregationForLargeWindow: true,
   suppressAggregationForLargeWindowScreenWidthPercentageThreshold: 50,
   suppressAggregationForLargeWindowScreenHeightPercentageThreshold: 50,
-  */
 
   aggregateTabsFromPinned: true,
   aggregateTabsFromUnpinned: true,

@@ -20,6 +20,8 @@ const gValues = new SessionValues({
     value => [...value.entries()].map(([key, value]) => [key, value && [...value]]),
     value => new Map(value.map(([key, value]) => [key, new Set(value)]))
   ),
+  knownScreens: new Map(),
+  knownMeasureWindows: new Set(),
   anyWindowHasFocus: true,
   createdAt: new Map(),
   lastActive: new Map(),
@@ -330,6 +332,7 @@ browser.tabs.onCreated.addListener(async newTab => {
     log('delayed onCreated: tab: ', tab);
     tryAggregateTab(tab, {
       excludeLastTab: true,
+      screen: configs.suppressAggregationForLargeWindow && await findScreenForWindow(tab.windowId),
       mayFromExternalApp,
     });
   }, 100);
@@ -356,7 +359,10 @@ browser.tabs.onCreated.addListener(async newTab => {
     return;
   }
 
-  const bookmarked = await isBookmarked(newTab);
+  const [bookmarked, screen] = await Promise.all([
+    isBookmarked(newTab),
+    configs.suppressAggregationForLargeWindow && findScreenForWindow(newTab.windowId),
+  ]);
   if (!bookmarked &&
       newTab.url == 'about:blank') {
     log('ignore loading tab');
@@ -366,9 +372,78 @@ browser.tabs.onCreated.addListener(async newTab => {
   tryAggregateTab(newTab, {
     excludeLastTab: true,
     bookmarked,
+    screen,
     mayFromExternalApp,
   });
 });
+
+async function findScreenForWindow(windowId) {
+  if (gValues.knownMeasureWindows.has(windowId))
+    return null;
+
+  const win = await browser.windows.get(windowId);
+  log('findScreenForWindow: start for window ', win);
+  let foundScreen = null;
+  if (inScreen(win, window.screen)) {
+    foundScreen = {
+      top:    window.screen.top,
+      right:  window.screen.left + window.screen.width,
+      bottom: window.screen.top + window.screen.height,
+      left:   window.screen.left,
+      width:  window.screen.width,
+      height: window.screen.height,
+    };
+    log('findScreenForWindow:  => in main screen ', foundScreen);
+    gValues.knownScreens.set(`${foundScreen.top},${foundScreen.right},${foundScreen.bottom},${foundScreen.left}`, foundScreen);
+    gValues.save();
+  }
+  if (!foundScreen) {
+    for (const [key, screen] of gValues.knownScreens.entries()) {
+      if (!inScreen(win, screen))
+        continue;
+      foundScreen = screen;
+      console.log(' => found: ', foundScreen);
+      break;
+    }
+    if (!foundScreen) {
+      log('findScreenForWindow:  => not found, trying to measure new screen');
+      const measureWin = await browser.windows.create({
+        url: 'about:blank',
+        type: 'popup',
+        left: win.left,
+        top: win.top,
+        width: win.width,
+        height: win.height,
+      });
+      gValues.knownMeasureWindows.add(measureWin.id);
+      gValues.save();
+      await browser.windows.update(measureWin.id, { state: 'fullscreen' });
+      const updatedMeasureWin = await browser.windows.get(measureWin.id);
+      browser.windows.remove(measureWin.id);
+      const screen = {
+        top: updatedMeasureWin.top,
+        right: updatedMeasureWin.left + updatedMeasureWin.width,
+        bottom: updatedMeasureWin.top + updatedMeasureWin.height,
+        left: updatedMeasureWin.left,
+        width: updatedMeasureWin.width,
+        height: updatedMeasureWin.height,
+      };
+      log('findScreenForWindow:  => measured new screen: ', screen);
+      gValues.knownScreens.set(`${screen.top},${screen.right},${screen.bottom},${screen.left}`, screen);
+      gValues.save();
+    }
+  }
+  return foundScreen;
+}
+
+function inScreen(win, screen) {
+  return !(
+    screen.left > win.left + win.width ||
+    screen.top > win.top + win.height ||
+    screen.left + screen.width < win.left ||
+    screen.top + screen.height < win.top
+  );
+}
 
 browser.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
   await gValues.$loaded;
@@ -399,6 +474,7 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     gValues.save();
     tryAggregateTab(tab, {
       excludeLastTab: true,
+      screen: configs.suppressAggregationForLargeWindow && await findScreenForWindow(tab.windowId),
     });
     return;
   }
@@ -476,10 +552,11 @@ browser.windows.onRemoved.addListener(async windowId => {
   gValues.save();
 });
 
-async function tryAggregateTab(tab, { bookmarked, mayFromExternalApp, ...options } = {}) {
-  log('tryAggregateTab ', { tab, bookmarked, options });
+async function tryAggregateTab(tab, { bookmarked, screen, mayFromExternalApp, ...options } = {}) {
+  log('tryAggregateTab ', { tab, bookmarked, screen, mayFromExternalApp, options });
   const shouldBeAggregated = await shouldAggregateTab(tab, {
     bookmarked,
+    screen,
     mayFromExternalApp,
   });
   if (!shouldBeAggregated)
@@ -498,7 +575,7 @@ async function tryAggregateTab(tab, { bookmarked, mayFromExternalApp, ...options
   browser.tabs.update(tab.id, { active: true });
 }
 
-async function shouldAggregateTab(tab, { bookmarked, fromExternalApp } = {}) {
+async function shouldAggregateTab(tab, { bookmarked, screen, fromExternalApp } = {}) {
   const [opener, sourceWindow] = await Promise.all([
     tab.openerTabId && await browser.tabs.get(tab.openerTabId),
     browser.windows.get(tab.windowId, { populate: true }),
@@ -558,6 +635,14 @@ async function shouldAggregateTab(tab, { bookmarked, fromExternalApp } = {}) {
   // Auto-aggregation for such intentional cases need to be suppressed by options.
   else if (configs.suppressAggregationForManyTabsWindow &&
            sourceWindow.tabs.length - 1 /* ignroe the to-be-aggregated tab */ >= configs.suppressAggregationForManyTabsWindowThreshold) {
+    log('the window has many tabs, so we suppress aggregation');
+    shouldBeAggregated = false;
+  }
+  else if (screen &&
+           configs.suppressAggregationForLargeWindow &&
+           sourceWindow.width >= configs.suppressAggregationForLargeWindowScreenWidthPercentageThreshold / 100 * screen.width &&
+           sourceWindow.height >= configs.suppressAggregationForLargeWindowScreenHeightPercentageThreshold / 100 * screen.height) {
+    log('the window is large enough to suppress aggregation ', { screen, sourceWindow });
     shouldBeAggregated = false;
   }
 

@@ -557,7 +557,7 @@ async function shouldAggregateTab(tab, { bookmarked, fromExternalApp } = {}) {
   // On the other hand, tabs from internal are generally opened with operations on any browser window intentionally.
   // Auto-aggregation for such intentional cases need to be suppressed by options.
   else if (configs.suppressAggregationForManyTabsWindow &&
-           sourceWindow.tabs.length >= configs.suppressAggregationForManyTabsWindowThreshold) {
+           sourceWindow.tabs.length - 1 /* ignroe the to-be-aggregated tab */ >= configs.suppressAggregationForManyTabsWindowThreshold) {
     shouldBeAggregated = false;
   }
 

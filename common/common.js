@@ -29,6 +29,8 @@ configs = new Configs({
   iconColor: 'auto',
   activeComparers: ['wider', 'taller', 'muchTabs', 'recent'],
 
+  enabled: true,
+
   suppressAggregationForManyTabsWindow: true,
   suppressAggregationForManyTabsWindowThreshold: 3,
   suppressAggregationForLargeWindow: true,

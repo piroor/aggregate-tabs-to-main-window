@@ -67,6 +67,14 @@ Promise.all([
     return;
   }
 
+  browser.menus.create({
+    id: 'enabled',
+    title: browser.i18n.getMessage('browserAction_enabled'),
+    type: 'checkbox',
+    checked: configs.enabled,
+    contexts: ['action'],
+  });
+
   const now = Date.now();
   let mainWindow = null;
   await Promise.all(windows.map(async window => {
@@ -80,6 +88,26 @@ Promise.all([
   await updateIconForBrowserTheme();
   if (mainWindow)
     await markWindowAsMain(mainWindow.id);
+});
+
+browser.menus.onClicked.addListener((info, tab) => {
+  switch (info.menuItemId) {
+    case 'enabled':
+      configs.enabled = info.checked;
+      updateIconForBrowserTheme();
+      break;
+
+    default:
+      break;
+  }
+});
+
+browser.menus.onShown.addListener((info, tab) => {
+  browser.menus.update({
+    id: 'enabled',
+    checked: configs.enabled,
+  });
+  browser.menus.refresh();
 });
 
 
@@ -158,6 +186,7 @@ async function updateIconForBrowserTheme(theme) {
   }
 
   log('updateIconForBrowserTheme: ', theme);
+  const disabled = configs.enabled ? '' : '-disabled';
   if (theme.colors) {
     const actionIconColor = theme.colors.icons || theme.colors.toolbar_text || theme.colors.tab_text || theme.colors.tab_background_text || theme.colors.bookmark_text || theme.colors.textcolor;
     log(' => ', { actionIconColor }, theme.colors);
@@ -165,12 +194,12 @@ async function updateIconForBrowserTheme(theme) {
       const response = await fetch(url);
       const body = await response.text();
       const actionIconSource = body.replace(/transparent\s*\/\*\s*TO BE REPLACED WITH THEME COLOR\s*\*\//g, actionIconColor);
-      ICON_FOR_STATE[state] = `data:image/svg+xml,${escape(actionIconSource)}#toolbar-theme`;
+      ICON_FOR_STATE[state] = `data:image/svg+xml,${escape(actionIconSource)}#toolbar-theme${disabled}`;
     }));
   }
   else {
     for (const [state, url] of Object.entries(ORIGINAL_ICON_FOR_STATE)) {
-      ICON_FOR_STATE[state] = `${url}#toolbar`;
+      ICON_FOR_STATE[state] = `${url}#toolbar${disabled}`;
     }
   }
 
@@ -576,6 +605,9 @@ async function tryAggregateTab(tab, { bookmarked, screen, mayFromExternalApp, ..
 }
 
 async function shouldAggregateTab(tab, { bookmarked, screen, fromExternalApp } = {}) {
+  if (!configs.enabled)
+    return false;
+
   const [opener, sourceWindow] = await Promise.all([
     tab.openerTabId && await browser.tabs.get(tab.openerTabId),
     browser.windows.get(tab.windowId, { populate: true }),

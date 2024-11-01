@@ -4,6 +4,7 @@
 
   "browserAction_inactive": { "message": "メインウィンドウとしてマークされていません" },
   "browserAction_active": { "message": "メインウィンドウとしてマークされています" },
+  "browserAction_enabled": { "message": "タブの集約を有効にする" },
 
   "config_appearance_caption": { "message": "外観" },
 

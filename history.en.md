@@ -1,6 +1,8 @@
 # History
 
  - master/HEAD
+ - 1.7.1 (2024.12.16)
+   * Move migrated tab to the end of the tab bar certainly, even if there are pinned tabs but no marked main window.
  - 1.7.0 (2024.11.1)
    * Add a new context menu command to deactivate tab aggregation temporarily, on the toolbar button.
    * Add new options to deactivate tab aggregation for certain cases: tabs opened in a window having multiple tabs or in a large window.

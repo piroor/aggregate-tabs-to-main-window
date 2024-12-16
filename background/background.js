@@ -793,6 +793,7 @@ function findMainWindowFrom(windows) {
 
   if (!configs.countPinnedTabsToDetectMainWindow) {
     for (const window of windows) {
+      window.allTabs = window.tabs; // save
       window.tabs = window.tabs.filter(tab => !tab.pinned);
     }
   }
@@ -809,6 +810,7 @@ function findMainWindowFrom(windows) {
     }
     return 0;
   });
-  log('findMainWindowFrom: sorted windows: ', windows);
-  return windows[0];
+  const found = windows[0];
+  found.tabs = found.allTabs; // restore
+  return found;
 }

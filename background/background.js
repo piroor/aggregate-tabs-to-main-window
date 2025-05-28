@@ -169,6 +169,24 @@ async function onToolbarButtonClick(tab) {
 }
 browser.action.onClicked.addListener(onToolbarButtonClick);
 
+browser.commands.onCommand.addListener(async command => {
+  const [win] = await Promise.all([
+    browser.windows.getLastFocused({ populate: false }),
+    gValues.$loaded,
+  ]);
+  switch (command) {
+    case '_execute_browser_action':
+      if (gValues.markedMainWindowId == win.id)
+        clearMarks();
+      else
+        markWindowAsMain(win.id);
+      return;
+
+    default:
+      break;
+  }
+});
+
 
 const mDarkModeMatchMedia = window.matchMedia('(prefers-color-scheme: dark)');
 

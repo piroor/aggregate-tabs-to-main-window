@@ -5,6 +5,7 @@
   "browserAction_inactive": { "message": "Not marked as Main Window" },
   "browserAction_active": { "message": "Marked as Main Window" },
   "browserAction_enabled": { "message": "Enable tab aggregation" },
+  "browserAction_command": { "message": "Set the active window as Main Window" },
 
   "config_appearance_caption": { "message": "Appearance" },
 

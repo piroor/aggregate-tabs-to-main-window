@@ -27,6 +27,14 @@
     },
     "default_area": "tabstrip"
   },
+  "commands": {
+    "_execute_browser_action": {
+      "description": "__MSG_browserAction_command__",
+      "suggested_key": {
+        "default": "Alt+Shift+M"
+      }
+    }
+  },
   "options_ui": {
     "page": "options/options.html"
   },

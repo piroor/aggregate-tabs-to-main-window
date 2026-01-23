@@ -13,12 +13,7 @@
     "theme"
   ],
   "background": {
-    "scripts": [
-      "extlib/Configs.js",
-      "extlib/SessionValues.js",
-      "common/common.js",
-      "background/background.js"
-    ]
+    "page": "background/background.html"
   },
   "action": {
     "default_title": "__MSG_browserAction_inactive__",

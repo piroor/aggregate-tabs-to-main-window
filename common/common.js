@@ -5,59 +5,46 @@
 */
 'use strict';
 
-let configs;
-let gLogContext = '?';
+import Configs from '/extlib/Configs.js';
 
-function log(message, ...args)
-{
-  if (!configs || !configs.debug)
-    return;
-
-  const nest = (new Error()).stack.split('\n').length;
-  let indent = '';
-  for (let i = 0; i < nest; i++) {
-    indent += ' ';
-  }
-  console.log(`aggregate-tabs<${gLogContext}>: ${indent}${message}`, ...args);
+let mLogContext = '?';
+export function setLogContext(context) {
+  mLogContext = context;
 }
 
-function wait(delay) {
-  return new Promise((resolve, reject) => setTimeout(resolve, delay));
-}
-
-configs = new Configs({
-  iconColor: 'auto',
+export const configs = new Configs({
+  iconColor:       'auto',
   activeComparers: ['wider', 'taller', 'muchTabs', 'recent'],
 
   enabled: true,
 
-  suppressAggregationForManyTabsWindow: true,
-  suppressAggregationForManyTabsWindowThreshold: 3,
-  suppressAggregationForLargeWindow: true,
-  suppressAggregationForLargeWindowScreenWidthPercentageThreshold: 50,
+  suppressAggregationForManyTabsWindow:                             true,
+  suppressAggregationForManyTabsWindowThreshold:                    3,
+  suppressAggregationForLargeWindow:                                true,
+  suppressAggregationForLargeWindowScreenWidthPercentageThreshold:  50,
   suppressAggregationForLargeWindowScreenHeightPercentageThreshold: 50,
 
-  aggregateTabsFromPinned: true,
-  aggregateTabsFromUnpinned: true,
-  aggregateTabsFromMatched: false,
-  aggregateTabsFromMatchedPattern: '',
-  aggregateTabsMatched: false,
-  aggregateTabsMatchedPattern: '^(about:newtab)',
-  doNotAggregateTabsFromMatched: false,
-  doNotAggregateTabsFromMatchedPattern: '',
-  doNotAggregateTabsMatched: false,
-  doNotAggregateTabsMatchedPattern: '',
-  countPinnedTabsToDetectMainWindow: false,
-  aggregateTabsForBookmarked: true,
-  aggregateDuplicatedTabs: false,
-  aggregateRestoredTabs: false,
-  aggregateTabsFromExternalApp: true,
-  aggregateTabsAll: true,
-  redirectLoadingInCurrentTab: false,
+  aggregateTabsFromPinned:                   true,
+  aggregateTabsFromUnpinned:                 true,
+  aggregateTabsFromMatched:                  false,
+  aggregateTabsFromMatchedPattern:           '',
+  aggregateTabsMatched:                      false,
+  aggregateTabsMatchedPattern:               '^(about:newtab)',
+  doNotAggregateTabsFromMatched:             false,
+  doNotAggregateTabsFromMatchedPattern:      '',
+  doNotAggregateTabsMatched:                 false,
+  doNotAggregateTabsMatchedPattern:          '',
+  countPinnedTabsToDetectMainWindow:         false,
+  aggregateTabsForBookmarked:                true,
+  aggregateDuplicatedTabs:                   false,
+  aggregateRestoredTabs:                     false,
+  aggregateTabsFromExternalApp:              true,
+  aggregateTabsAll:                          true,
+  redirectLoadingInCurrentTab:               false,
   redirectLoadingInCurrentTabMinWindowWidth: 400,
-  delayForMultipleNewTabs: 300,
-  delayForNewWindow: 1000,
-  acceptableFudgeFactors: {
+  delayForMultipleNewTabs:                   300,
+  delayForNewWindow:                         1000,
+  acceptableFudgeFactors:                    {
     wider:    5,
     taller:   5,
     muchTabs: 0,
@@ -70,6 +57,21 @@ configs = new Configs({
   `.trim().split('\n').map(key => key.trim()).filter(key => key && key.indexOf('//') != 0)
 });
 
+export function log(message, ...args) {
+  if (!configs.debug)
+    return;
+
+  const nest = (new Error()).stack.split('\n').length;
+  let indent = '';
+  for (let i = 0; i < nest; i++) {
+    indent += ' ';
+  }
+  console.log(`aggregate-tabs<${mLogContext}>: ${indent}${message}`, ...args);
+}
+
+export function wait(delay) {
+  return new Promise((resolve, _reject) => setTimeout(resolve, delay));
+}
 
 const RTL_LANGUAGES = new Set([
   'ar',
@@ -83,7 +85,7 @@ const RTL_LANGUAGES = new Set([
   'rhg',
 ]);
 
-function isRTL() {
+export function isRTL() {
   const lang = (
     navigator.language ||
     navigator.userLanguage ||

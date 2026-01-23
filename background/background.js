@@ -5,27 +5,38 @@
 */
 'use strict';
 
-gLogContext = 'BG';
+import {
+  configs,
+  log,
+  wait,
+  setLogContext,
+} from '/common/common.js';
+import {
+  SessionValues,
+  SessionValue,
+} from '/extlib/SessionValues.js';
+
+setLogContext('BG');
 
 const kMARKED_AS_MAIN_WINDOW = 'marked-as-main-window';
-const kMARKED                = 'true';
+const kMARKED = 'true';
 
 const gValues = new SessionValues({
-  markedMainWindowId: browser.windows.WINDOW_ID_NONE,
-  openingTabs: [],
-  creatingTabs: new Set(),
-  trackedWindows: new Set(),
+  markedMainWindowId:    browser.windows.WINDOW_ID_NONE,
+  openingTabs:           [],
+  creatingTabs:          new Set(),
+  trackedWindows:        new Set(),
   initialTabIdsInWindow: new SessionValue(
     new Map(),
     value => [...value.entries()].map(([key, value]) => [key, value && [...value]]),
     value => new Map(value.map(([key, value]) => [key, new Set(value)]))
   ),
-  knownScreens: new Map(),
+  knownScreens:        new Map(),
   knownMeasureWindows: new Set(),
-  anyWindowHasFocus: true,
-  createdAt: new Map(),
-  lastActive: new Map(),
-  lastCreatedAt: 0,
+  anyWindowHasFocus:   true,
+  createdAt:           new Map(),
+  lastActive:          new Map(),
+  lastCreatedAt:       0,
 });
 
 let gAggregateTabsMatchedPattern = null;
@@ -68,10 +79,10 @@ Promise.all([
   }
 
   browser.menus.create({
-    id: 'enabled',
-    title: browser.i18n.getMessage('browserAction_enabled'),
-    type: 'checkbox',
-    checked: configs.enabled,
+    id:       'enabled',
+    title:    browser.i18n.getMessage('browserAction_enabled'),
+    type:     'checkbox',
+    checked:  configs.enabled,
     contexts: ['action'],
   });
 
@@ -90,7 +101,7 @@ Promise.all([
     await markWindowAsMain(mainWindow.id);
 });
 
-browser.menus.onClicked.addListener((info, tab) => {
+browser.menus.onClicked.addListener((info, _tab) => {
   switch (info.menuItemId) {
     case 'enabled':
       configs.enabled = info.checked;
@@ -102,9 +113,9 @@ browser.menus.onClicked.addListener((info, tab) => {
   }
 });
 
-browser.menus.onShown.addListener((info, tab) => {
+browser.menus.onShown.addListener((_info, _tab) => {
   browser.menus.update({
-    id: 'enabled',
+    id:      'enabled',
     checked: configs.enabled,
   });
   browser.menus.refresh();
@@ -293,9 +304,9 @@ function handleMissingTabError(error) {
 }
 
 async function getUniqueTabId(tabId) {
-  let originalId    = null;
+  let originalId = null;
   let originalTabId = null;
-  let duplicated    = false;
+  let duplicated = false;
 
   let oldId = await browser.sessions.getTabValue(tabId, kPERSISTENT_ID);
   if (oldId && !oldId.tabId) // ignore broken information!
@@ -335,7 +346,7 @@ async function getUniqueTabId(tabId) {
   }
 
   const randomValue = Math.floor(Math.random() * 1000);
-  const id          = `tab-${Date.now()}-${randomValue}`;
+  const id = `tab-${Date.now()}-${randomValue}`;
   // tabId is for detecttion of duplicated tabs
   await browser.sessions.setTabValue(tabId, kPERSISTENT_ID, { id, tabId });
   return { id, originalId, originalTabId, duplicated };
@@ -379,7 +390,7 @@ browser.tabs.onCreated.addListener(async newTab => {
     log('delayed onCreated: tab: ', tab);
     tryAggregateTab(tab, {
       excludeLastTab: true,
-      screen: configs.suppressAggregationForLargeWindow && await findScreenForWindow(tab.windowId),
+      screen:         configs.suppressAggregationForLargeWindow && await findScreenForWindow(tab.windowId),
       mayFromExternalApp,
     });
   }, 100);
@@ -445,7 +456,7 @@ async function findScreenForWindow(windowId) {
     gValues.save();
   }
   if (!foundScreen) {
-    for (const [key, screen] of gValues.knownScreens.entries()) {
+    for (const screen of gValues.knownScreens.values()) {
       if (!inScreen(win, screen))
         continue;
       foundScreen = screen;
@@ -455,11 +466,11 @@ async function findScreenForWindow(windowId) {
     if (!foundScreen) {
       log('findScreenForWindow:  => not found, trying to measure new screen');
       const measureWin = await browser.windows.create({
-        url: 'about:blank',
-        type: 'popup',
-        left: win.left,
-        top: win.top,
-        width: win.width,
+        url:    'about:blank',
+        type:   'popup',
+        left:   win.left,
+        top:    win.top,
+        width:  win.width,
         height: win.height,
       });
       gValues.knownMeasureWindows.add(measureWin.id);
@@ -468,11 +479,11 @@ async function findScreenForWindow(windowId) {
       const updatedMeasureWin = await browser.windows.get(measureWin.id);
       browser.windows.remove(measureWin.id);
       const screen = {
-        top: updatedMeasureWin.top,
-        right: updatedMeasureWin.left + updatedMeasureWin.width,
+        top:    updatedMeasureWin.top,
+        right:  updatedMeasureWin.left + updatedMeasureWin.width,
         bottom: updatedMeasureWin.top + updatedMeasureWin.height,
-        left: updatedMeasureWin.left,
-        width: updatedMeasureWin.width,
+        left:   updatedMeasureWin.left,
+        width:  updatedMeasureWin.width,
         height: updatedMeasureWin.height,
       };
       log('findScreenForWindow:  => measured new screen: ', screen);
@@ -521,7 +532,7 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     gValues.save();
     tryAggregateTab(tab, {
       excludeLastTab: true,
-      screen: configs.suppressAggregationForLargeWindow && await findScreenForWindow(tab.windowId),
+      screen:         configs.suppressAggregationForLargeWindow && await findScreenForWindow(tab.windowId),
     });
     return;
   }
@@ -817,7 +828,7 @@ function findMainWindowFrom(windows) {
   }
 
   windows = windows.slice(0).sort((a, b) => {
-    for (let name of configs.activeComparers) {
+    for (const name of configs.activeComparers) {
       const result = comparers[name](a, b);
       const acceptableFudgeFactor = configs.acceptableFudgeFactors[name] || 0;
       log('findMainWindowFrom: sorting ', { name, a: a.id, b: b.id, result, acceptableFudgeFactor });

@@ -5,7 +5,11 @@
 */
 'use strict';
 
-gLogContext = 'Options';
+import Options from '../extlib/Options.js';
+import '../extlib/l10n.js';
+import { configs, isRTL, setLogContext } from '../common/common.js';
+
+setLogContext('Options');
 const options = new Options(configs);
 
 function onConfigChanged(key) {

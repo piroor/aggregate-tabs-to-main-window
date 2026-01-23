@@ -3,98 +3,77 @@
    - License, v. 2.0. If a copy of the MPL was not distributed with this
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <script type="application/javascript" src="/extlib/Configs.js"></script>
-    <script type="application/javascript" src="/common/common.js"></script>
-    <script type="application/javascript" src="/extlib/Options.js"></script>
-    <script type="application/javascript" src="/extlib/l10n.js"></script>
-    <script type="application/javascript" src="/options/init.js"></script>
-    <link rel="stylesheet" type="text/css" href="options.css"/>
-  </head>
-  <body>
-    <!--h1>__MSG_config_appearance_caption__</h1-->
-    <h1>__MSG_config_aggregatedTabCondition_caption__</h1>
-    <p><label><input id="aggregateTabsFromPinned"
-                     type="checkbox">
-             __MSG_config_aggregateTabsFromPinned_caption__</label></p>
-    <p><label><input id="aggregateTabsFromUnpinned"
-                     type="checkbox">
-             __MSG_config_aggregateTabsFromUnpinned_caption__</label></p>
-    <p><label><input id="aggregateTabsFromMatched"
-                     type="checkbox">
-             __MSG_config_aggregateTabsFromMatched_caption__</label>
-             <input id="aggregateTabsFromMatchedPattern" type="text" size="40"></p>
-    <p class="sub"><label><input id="doNotAggregateTabsFromMatched"
-                     type="checkbox">
-             __MSG_config_doNotAggregateTabsFromMatched_caption__</label>
-             <input id="doNotAggregateTabsFromMatchedPattern" type="text" size="40"></p>
-    <p><label><input id="aggregateTabsMatched"
-                     type="checkbox">
-             __MSG_config_aggregateTabsMatched_caption__</label>
-             <input id="aggregateTabsMatchedPattern" type="text" size="40"></p>
-    <p class="sub"><label><input id="doNotAggregateTabsMatched"
-                     type="checkbox">
-             __MSG_config_doNotAggregateTabsMatched_caption__</label>
-             <input id="doNotAggregateTabsMatchedPattern" type="text" size="40"></p>
-    <p><label><input id="aggregateTabsForBookmarked"
-                     type="checkbox">
-             __MSG_config_aggregateTabsForBookmarked_caption__</label></p>
-    <p><label><input id="aggregateDuplicatedTabs"
-                     type="checkbox">
-             __MSG_config_aggregateDuplicatedTabs_caption__</label></p>
-    <p><label><input id="aggregateRestoredTabs"
-                     type="checkbox">
-             __MSG_config_aggregateRestoredTabs_caption__</label></p>
-    <p><label><input id="aggregateTabsFromExternalApp"
-                     type="checkbox">
-             __MSG_config_aggregateTabsFromExternalApp_caption__</label></p>
-    <p><label><input id="aggregateTabsAll"
-                     type="checkbox">
-             __MSG_config_aggregateTabsAll_caption__</label></p>
 
-    <fieldset>
-      <legend>__MSG_config_suppressAggregation_caption__</legend>
-      <p><label><input id="suppressAggregationForManyTabsWindow"
-                       type="checkbox">
-               __MSG_config_suppressAggregationForManyTabsWindowThreshold_before__</label>
-         <label><input id="suppressAggregationForManyTabsWindowThreshold"
-                       type="number"
-                       min="0"
-                       size="5">
-               __MSG_config_suppressAggregationForManyTabsWindowThreshold_after__</label</p>
-      <p><label><input id="suppressAggregationForLargeWindow"
-                       type="checkbox">
-               __MSG_config_suppressAggregationForLargeWindowScreenWidthPercentageThreshold_before__</label>
-         <label><input id="suppressAggregationForLargeWindowScreenWidthPercentageThreshold"
-                       type="number"
-                       min="0"
-                       max="100"
-                       size="5">
-               __MSG_config_suppressAggregationForLargeWindowScreenWidthPercentageThreshold_after__</label>
-         <label><input id="suppressAggregationForLargeWindowScreenHeightPercentageThreshold"
-                       type="number"
-                       min="0"
-                       max="100"
-                       size="5">
-               __MSG_config_suppressAggregationForLargeWindowScreenHeightPercentageThreshold_after__</label></p>
-    </fieldset>
+<head>
+        <meta charset="UTF-8">
+        <script type="module" src="init.js"></script>
+        <link rel="stylesheet" type="text/css" href="options.css" />
+</head>
 
-    <h1>__MSG_config_sidebar_caption__</h1>
-    <p><label><input id="redirectLoadingInCurrentTab"
-                     type="checkbox">
-             __MSG_config_redirectLoadingInCurrentTabMinWindowWidth_label_before__</label>
-       <label><input id="redirectLoadingInCurrentTabMinWindowWidth"
-                     type="number"
-                     size="4">
-             __MSG_config_redirectLoadingInCurrentTabMinWindowWidth_label_after__</label></p>
+<body>
+        <!--h1>__MSG_config_appearance_caption__</h1-->
+        <h1>__MSG_config_aggregatedTabCondition_caption__</h1>
+        <p><label><input id="aggregateTabsFromPinned" type="checkbox">
+                        __MSG_config_aggregateTabsFromPinned_caption__</label></p>
+        <p><label><input id="aggregateTabsFromUnpinned" type="checkbox">
+                        __MSG_config_aggregateTabsFromUnpinned_caption__</label></p>
+        <p><label><input id="aggregateTabsFromMatched" type="checkbox">
+                        __MSG_config_aggregateTabsFromMatched_caption__</label>
+                <input id="aggregateTabsFromMatchedPattern" type="text" size="40">
+        </p>
+        <p class="sub"><label><input id="doNotAggregateTabsFromMatched" type="checkbox">
+                        __MSG_config_doNotAggregateTabsFromMatched_caption__</label>
+                <input id="doNotAggregateTabsFromMatchedPattern" type="text" size="40">
+        </p>
+        <p><label><input id="aggregateTabsMatched" type="checkbox">
+                        __MSG_config_aggregateTabsMatched_caption__</label>
+                <input id="aggregateTabsMatchedPattern" type="text" size="40">
+        </p>
+        <p class="sub"><label><input id="doNotAggregateTabsMatched" type="checkbox">
+                        __MSG_config_doNotAggregateTabsMatched_caption__</label>
+                <input id="doNotAggregateTabsMatchedPattern" type="text" size="40">
+        </p>
+        <p><label><input id="aggregateTabsForBookmarked" type="checkbox">
+                        __MSG_config_aggregateTabsForBookmarked_caption__</label></p>
+        <p><label><input id="aggregateDuplicatedTabs" type="checkbox">
+                        __MSG_config_aggregateDuplicatedTabs_caption__</label></p>
+        <p><label><input id="aggregateRestoredTabs" type="checkbox">
+                        __MSG_config_aggregateRestoredTabs_caption__</label></p>
+        <p><label><input id="aggregateTabsFromExternalApp" type="checkbox">
+                        __MSG_config_aggregateTabsFromExternalApp_caption__</label></p>
+        <p><label><input id="aggregateTabsAll" type="checkbox">
+                        __MSG_config_aggregateTabsAll_caption__</label></p>
 
-    <h1>__MSG_config_debug_caption__</h1>
-    <p><label><input id="debug"
-                     type="checkbox">
-             __MSG_config_debug_label__</label></p>
-    <div id="debug-configs">
-      <h2>__MSG_config_all_caption__</h2>
-    </div>
-  </body>
+        <fieldset>
+                <legend>__MSG_config_suppressAggregation_caption__</legend>
+                <p><label><input id="suppressAggregationForManyTabsWindow" type="checkbox">
+                                __MSG_config_suppressAggregationForManyTabsWindowThreshold_before__</label>
+                        <label><input id="suppressAggregationForManyTabsWindowThreshold" type="number" min="0" size="5">
+                                __MSG_config_suppressAggregationForManyTabsWindowThreshold_after__</label< /p>
+                                <p><label><input id="suppressAggregationForLargeWindow" type="checkbox">
+                                                __MSG_config_suppressAggregationForLargeWindowScreenWidthPercentageThreshold_before__</label>
+                                        <label><input id="suppressAggregationForLargeWindowScreenWidthPercentageThreshold"
+                                                        type="number" min="0" max="100" size="5">
+                                                __MSG_config_suppressAggregationForLargeWindowScreenWidthPercentageThreshold_after__</label>
+                                        <label><input id="suppressAggregationForLargeWindowScreenHeightPercentageThreshold"
+                                                        type="number" min="0" max="100" size="5">
+                                                __MSG_config_suppressAggregationForLargeWindowScreenHeightPercentageThreshold_after__</label>
+                                </p>
+        </fieldset>
+
+        <h1>__MSG_config_sidebar_caption__</h1>
+        <p><label><input id="redirectLoadingInCurrentTab" type="checkbox">
+                        __MSG_config_redirectLoadingInCurrentTabMinWindowWidth_label_before__</label>
+                <label><input id="redirectLoadingInCurrentTabMinWindowWidth" type="number" size="4">
+                        __MSG_config_redirectLoadingInCurrentTabMinWindowWidth_label_after__</label>
+        </p>
+
+        <h1>__MSG_config_debug_caption__</h1>
+        <p><label><input id="debug" type="checkbox">
+                        __MSG_config_debug_label__</label></p>
+        <div id="debug-configs">
+                <h2>__MSG_config_all_caption__</h2>
+        </div>
+</body>
+
 </html>

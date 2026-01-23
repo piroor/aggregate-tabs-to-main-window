@@ -18,7 +18,7 @@ lint: install_dependency
 format: install_dependency
 	"$(NPM_BIN_DIR)/eslint" . --report-unused-disable-directives --fix
 
-xpi: init_extlib lint
+xpi: init_extlib install_extlib lint
 	rm -f ./*.xpi
 	zip -r -9 aggregate-tabs-to-main-window.xpi manifest.json _locales common background options resources extlib -x '*/.*' >/dev/null 2>/dev/null
 

@@ -1,6 +1,10 @@
 # History
 
  - master/HEAD
+ - 1.7.2 (2026.6.30)
+   * Add keyboard shortcut slot for the command "Set the active window as Main Window".
+   * Better appearance of the options page in RTL environments.
+   * Prevent possible message storm around sync and reset of configs.
  - 1.7.1 (2024.12.16)
    * Move migrated tab to the end of the tab bar certainly, even if there are pinned tabs but no marked main window.
  - 1.7.0 (2024.11.1)

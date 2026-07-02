@@ -1,6 +1,8 @@
 # History
 
  - master/HEAD
+ - 1.7.3 (2026.7.3)
+   * Behave as settings correctly after they are back to their default values. (regression on 1.7.2)
  - 1.7.2 (2026.6.30)
    * Add keyboard shortcut slot for the command "Set the active window as Main Window".
    * Better appearance of the options page in RTL environments.
